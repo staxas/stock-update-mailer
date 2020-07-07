@@ -201,7 +201,7 @@ echo "grandTotalValueDiffPercent ${grandTotalValueDiffPercent}"
 (
 echo "From: ${email}";
 echo "To: ${email}";
-echo "Subject: Fondsen update";
+echo "Subject: Stock update";
 echo "Content-Type: text/html";
 echo "MIME-Version: 1.0";
 echo "";
