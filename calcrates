@@ -72,7 +72,7 @@ do
   indiceNames+=("")
 done
 
-indice_names_file="${fileroot}/data/naming/indice_names"
+indice_names_file="${fileroot}/data/naming/names"
 
 # Get indice names
 while IFS="," read -r ind name
