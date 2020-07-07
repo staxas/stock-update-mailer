@@ -1,5 +1,5 @@
 # stock-update-mailer
-Get updates on stock movements and changes on owned stock in your email
+Get updates on stock movements and changes in owned stock in your email
 
 Requires sendmail to be installed
 
