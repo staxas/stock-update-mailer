@@ -3,7 +3,7 @@ Get updates on indice share movements in your email
 
 Requires sendmail to be installed
 
-You will need to manually adapt the scraper (getrates) to store historic rates, and change $fileroot variable to match your working directory
+You will need to manually adapt the scraper (getrates) to store historic rates, and change $fileroot variable to suit your working directory
 
 Example data line in data/user_data/owned:
 ```

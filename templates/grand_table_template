@@ -1,0 +1,22 @@
+<hr>
+<table>
+    <thead>
+        <tr>
+            <th colspan="4">Grand totals</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Grand total purchase</td>
+            <td>Grand total curr value</td>
+            <td>Grand total difference</td>
+            <td>Grand total diff %</td>
+        </tr>
+        <tr>
+            <td>${grandTotalPurchase}</td>
+            <td>${grandTotalCurrValue}</td>
+            <td>${grandTotalValueDiff}</td>
+            <td>${grandTotalValueDiffPercent}</td>
+        </tr>
+    </tbody>
+</table>

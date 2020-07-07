@@ -1,0 +1,210 @@
+#!/bin/bash
+
+getPos() {
+  local toFind="${1}"
+  shift
+  local i=0;
+  if [[ "${@}" > 0 ]]; then
+    for v in ${@}
+    do
+      if [[ $v == $toFind ]]; then
+        echo ${i};
+        return;
+      fi;
+    i=$((i + 1));
+    done;
+  fi
+  echo "-1";
+  return;
+}
+
+getPoss() {
+  local toFind="${1}"
+  shift
+  local i=0;
+  local p=();
+  if [[ "${@}" > 0 ]]; then
+    for v in ${@}
+    do
+      if [[ $v == $toFind ]]; then
+        p+=(${i});
+      fi;
+    i=$((i + 1));
+    done;
+  fi
+  echo "${p[@]}"
+}
+
+# Project working directory
+fileroot="/home/edwin/stock-update-mailer"
+
+# Prepare grand total variables
+grandTotalPurchase=0
+grandTotalCurrValue=0
+grandTotalValueDiff=0
+grandTotalValueDiffPercent=0
+
+# Get available indices
+files=$(find /home/edwin/fitvermogen_data/data/rates/*)
+filenames=()
+indices=()
+totalAmountBought=()
+totalPurchase=()
+totalRate=()
+nrOfEntries=()
+averageRate=()
+rateDiff=()
+totalPurchaseValue=()
+totalPurchaseDiff=()
+indiceNames=()
+for fname in $files
+do
+  filenames+=(${fname})
+  indices+=($(basename $fname))
+  totalAmountBought+=(0)
+  totalPurchase+=(0)
+  totalRate+=(0)
+  nrOfEntries+=(0)
+  averageRate+=(0)
+  rateDiff+=(0)
+  totalPurchaseValue+=(0)
+  totalPurchaseDiff+=(0)
+  indiceNames+=("")
+done
+
+indice_names_file="${fileroot}/data/naming/indice_names"
+
+# Get indice names
+while IFS="," read -r ind name
+do
+   if [[ ${indices[@]} =~ ${ind} ]]; then
+     pos=$(getPos ${ind} ${indices[@]})
+     indiceNames[${pos}]=${name}
+   fi
+done < "${indice_names_file}"
+
+# Get owned indices, dates & amount bought
+buyDates=()
+indicesBought=()
+amountsBought=()
+input="${fileroot}/data/user_data/owned"
+while IFS="," read -r d indice amt
+do
+  buyDates+=(${d})
+  indicesBought+=(${indice})
+  amountsBought+=(${amt})
+done < "$input"
+
+lastRate=()
+for fname in ${filenames[@]}
+do
+  readarray -d "," -t strarr <<< $(tail -1 ${fname})
+  lastRate+=($(echo "${strarr[1]}" | tr -d '\n'))
+done
+
+# Loop through all known indices
+for indice in ${indices[@]}
+do
+  # If one of the indices looped through is known to have been bought,
+  if [[ ${indicesBought[@]} =~ ${indice} ]]; then
+    # then get its position
+    indPos=$(getPos ${indice} ${indices[@]})
+    # Start reading the historic data of that indice
+    while IFS="," read -r d rate
+    do
+      #echo "date ${d}"
+      # If data of a date has been found of when indice that is owned was bought,
+      if [[ ${indicesBought[@]} =~ ${indice} ]] && [[ ${buyDates[@]} =~ ${d} ]]; then
+        # then get the position of the ownership data in their respective arrays
+        bdPoss=$(getPoss ${d} ${buyDates[@]})
+        for bdPos in ${bdPoss[@]}
+        do
+          if [[ ${indicesBought[bdPos]} == ${indice} ]]; then
+            amtBght=${amountsBought[bdPos]}
+            purchase=$(awk '{print $1*$2}' <<< "${amtBght} ${rate}")
+            totalAmountBought[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountBought[indPos]} ${amtBght}")
+            totalPurchase[indPos]=$(awk '{print $1+$2}' <<< "${totalPurchase[indPos]} ${purchase}")
+            grandTotalPurchase=$(awk '{print $1+$2}' <<< "${grandTotalPurchase} ${purchase}")
+            # Needed to calculate average rate
+            totalRate[indPos]=$(awk '{print $1+$2}' <<< "${totalRate[indPos]} ${rate}")
+            nrOfEntries[indPos]=$((nrOfEntries[indPos] + 1))
+          fi
+        done
+      fi
+    done < "${filenames[${indPos}]}"
+  fi
+done
+
+i=0;
+table_template_file="${fileroot}/templates/table_template"
+table_template=$(cat "${table_template_file}")
+grand_table_template_file="${fileroot}/templates/grand_table_template"
+grand_table_template=$(cat "${grand_table_template_file}")
+header_template_file="${fileroot}/templates/header_template"
+footer_template_file="${fileroot}/templates/footer_template"
+email_file="${fileroot}/email.html"
+
+cat "${header_template_file}" >> "${email_file}"
+
+while [[ ${i} < ${#indices[@]} ]]
+do
+  if [[ ${totalRate[i]} != "0" ]] && [[ ${nrOfEntries[i]} != "0" ]]; then
+    averageRate[${i}]=$(awk '{print $1/$2}' <<< "${totalRate[i]} ${nrOfEntries[i]}")
+  fi
+  if [[ ${averageRate[i]} != "0" ]]; then
+    rDiff=$(awk '{print $1-$2}' <<< "${lastRate[i]} ${averageRate[i]}")
+    rateDiff[${i}]=$(awk '{print ($1/$2)*100}' <<< "${rDiff} ${averageRate[i]}")
+  fi
+  if [[ ${totalAmountBought[i]} != "0" ]]; then
+    totalPurchaseValue[${i}]=$(awk '{print $1*$2}' <<< "${totalAmountBought[i]} ${lastRate[i]}")
+    grandTotalCurrValue=$(awk '{print $1+$2}' <<< "${grandTotalCurrValue} ${totalPurchaseValue[i]}")
+  fi
+  if [[ ${totalPurchaseValue[i]} != "0" ]] && [[ ${totalPurchase[i]} != "0" ]] ; then
+    totalPurchaseDiff=[${i}]=$(awk '{print $1-$2}' <<< "${totalPurchaseValue} ${totalPurchase}")
+  fi
+  value=$(eval "echo \"$(cat ${table_template_file})\"")
+  echo $value >> "${email_file}"
+  i=$((i + 1))
+done
+
+grandTotalValueDiff=$(awk '{print ($1-$2)}' <<< "${grandTotalCurrValue} ${grandTotalPurchase}")
+
+if [[ ${grandTotalValueDiff} != "0" ]] && [[ ${grandTotalPurchase} != "0" ]]; then
+  grandTotalValueDiffPercent=$(awk '{print ($1/$2)*100}' <<< "${grandTotalValueDiff} ${grandTotalPurchase}")
+fi
+
+value=$(eval "echo \"$(cat ${grand_table_template_file})\"")
+echo $value >> "${email_file}"
+
+cat "${footer_template_file}" >> "${email_file}"
+
+echo "---"
+echo "date $(date +%Y.%m.%d)"
+echo "indices ${indices[@]}"
+echo "totalAmountBought ${totalAmountBought[@]}"
+echo "totalPurchase ${totalPurchase[@]}"
+echo "totalRate ${totalRate[@]}"
+echo "averageRate ${averageRate[@]}"
+echo "nrOfEntries ${nrOfEntries[@]}"
+echo "lastRate ${lastRate[@]}"
+echo "rateDiff ${rateDiff[@]}"
+echo "totalPurchaseValue ${totalPurchaseValue[@]}"
+echo "totalPurchaseDiff ${totalPurchaseDiff[@]}"
+echo "grandTotalPurchase ${grandTotalPurchase}"
+echo "grandTotalCurrValue ${grandTotalCurrValue}"
+echo "grandTotalValueDiff ${grandTotalValueDiff}"
+echo "grandTotalValueDiffPercent ${grandTotalValueDiffPercent}"
+
+(
+echo "From: e.rietmeijer@gmail.com";
+echo "To: e.rietmeijer@gmail.com";
+echo "Subject: Fondsen update";
+echo "Content-Type: text/html";
+echo "MIME-Version: 1.0";
+echo "";
+echo "$(cat ${email_file})";
+) | sendmail -t
+
+if [[ -f ${email_file} ]]; then
+  rm "${email_file}"
+fi

@@ -1,0 +1,27 @@
+<table>
+    <thead>
+        <tr>
+            <th colspan="7">${indiceNames[i]}</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Total amt</td>
+            <td>Total buy</td>
+            <td>Total curr val</td>
+            <td>Total buy diff</td>
+            <td>Avg Rate</td>
+            <td>Last Rate</td>
+            <td>Rate Diff %</td>
+        </tr>
+        <tr>
+            <td>${totalAmountBought[i]}</td>
+            <td>${totalPurchase[i]}</td>
+            <td>${totalPurchaseValue[i]}</td>
+            <td>${totalPurchaseDiff[i]}</td>
+            <td>${averageRate[i]}</td>
+            <td>${lastRate[i]}</td>
+            <td>${rateDiff[i]}</td>
+        </tr>
+    </tbody>
+</table>
