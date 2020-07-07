@@ -39,7 +39,7 @@ getPoss() {
 fileroot="/home/edwin/stock-update-mailer"
 
 # Email addres
-email="e.rietmeijer@gmail.com"
+email="your@email.com"
 
 # Prepare grand total variables
 grandTotalPurchase=0
