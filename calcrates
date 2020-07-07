@@ -38,6 +38,9 @@ getPoss() {
 # Project working directory
 fileroot="/home/edwin/stock-update-mailer"
 
+# Email addres
+email="e.rietmeijer@gmail.com"
+
 # Prepare grand total variables
 grandTotalPurchase=0
 grandTotalCurrValue=0
@@ -196,8 +199,8 @@ echo "grandTotalValueDiff ${grandTotalValueDiff}"
 echo "grandTotalValueDiffPercent ${grandTotalValueDiffPercent}"
 
 (
-echo "From: e.rietmeijer@gmail.com";
-echo "To: e.rietmeijer@gmail.com";
+echo "From: ${email}";
+echo "To: ${email}";
 echo "Subject: Fondsen update";
 echo "Content-Type: text/html";
 echo "MIME-Version: 1.0";
