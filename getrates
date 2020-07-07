@@ -13,16 +13,19 @@ hexFilter() {
 }
 
 scrape=$(curl https://www.morningstar.nl/nl/funds/snapshot/snapshot.aspx?id=F00000YGLU | grep -E "Koers.*EUR")
-rest=${scrape#*$str} && start=$(( ${#scrape} - ${#rest} - ${#str} ))
+rest=${scrape#*$str}
+start=$(( ${#scrape} - ${#rest} - ${#str} ))
 data=$(echo $scrape | cut -c$(($start - 11))-$(( $start - 4)) | tr "," ".")
 echo "${d},$(hexFilter ${data})" >> ${fileroot}/data/rates/NL0012125736
 
 scrape=$(curl https://www.morningstar.nl/nl/funds/snapshot/snapshot.aspx?id=F0GBR04B0Q | grep -E "Koers.*EUR")
-rest=${scrape#*$str} && start=$(( ${#scrape} - ${#rest} - ${#str} ))
+rest=${scrape#*$str}
+start=$(( ${#scrape} - ${#rest} - ${#str} ))
 data=$(echo $scrape | cut -c$(($start - 15))-$(( $start - 9)) | tr "," ".")
 echo "${d},$(hexFilter ${data})" >> ${fileroot}/data/rates/NL0006311839
 
 scrape=$(curl https://www.morningstar.nl/nl/funds/snapshot/snapshot.aspx?id=F0GBR04B0M | grep -E "Koers.*EUR")
-rest=${scrape#*$str} && start=$(( ${#scrape} - ${#rest} - ${#str} ))
+rest=${scrape#*$str}
+start=$(( ${#scrape} - ${#rest} - ${#str} ))
 data=$(echo $scrape | cut -c$(($start - 14))-$(( $start - 8)) | tr "," ".")
 echo "${d},$(hexFilter ${data})" >> ${fileroot}/data/rates/NL0006311821
