@@ -38,8 +38,8 @@ getPoss() {
 # Project working directory
 fileroot="/home/edwin/stock-update-mailer"
 
-# Email addres
-email="e.rietmeijer@gmail.com"
+# Email address
+email="your@email.com"
 
 # Prepare grand total variables
 grandTotalPurchase=0
@@ -47,8 +47,8 @@ grandTotalCurrValue=0
 grandTotalValueDiff=0
 grandTotalValueDiffPercent=0
 
-# Get available indices
-files=$(find /home/edwin/fitvermogen_data/data/rates/*)
+# Prepare arrays
+files=$(find "${fileroot}"/data/rates/*)
 filenames=()
 indices=()
 totalAmountBought=()
@@ -149,6 +149,7 @@ email_file="${fileroot}/email.html"
 
 cat "${header_template_file}" >> "${email_file}"
 
+# Totalling while loop
 while [[ ${i} < ${#indices[@]} ]]
 do
   if [[ ${totalRate[i]} != "0" ]] && [[ ${nrOfEntries[i]} != "0" ]]; then
@@ -165,8 +166,10 @@ do
   if [[ ${totalPurchaseValue[i]} != "0" ]] && [[ ${totalPurchase[i]} != "0" ]] ; then
     totalPurchaseDiff=[${i}]=$(awk '{print $1-$2}' <<< "${totalPurchaseValue} ${totalPurchase}")
   fi
+
   value=$(eval "echo \"$(cat ${table_template_file})\"")
   echo $value >> "${email_file}"
+
   i=$((i + 1))
 done
 
@@ -201,7 +204,7 @@ echo "grandTotalValueDiffPercent ${grandTotalValueDiffPercent}"
 (
 echo "From: ${email}";
 echo "To: ${email}";
-echo "Subject: Stock update";
+echo "Subject: Fondsen update";
 echo "Content-Type: text/html";
 echo "MIME-Version: 1.0";
 echo "";
@@ -211,3 +214,5 @@ echo "$(cat ${email_file})";
 if [[ -f ${email_file} ]]; then
   rm "${email_file}"
 fi
+
+# TODO: Add error handling for missing files
