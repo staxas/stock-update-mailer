@@ -52,10 +52,10 @@ while getopts ":l:c:d:e:s:" opt; do
 
 # Function to get first index of an item in an array
 getPos() {
-  local toFind="${1}"
+  local toFind=${1}
   shift
   local i=0;
-  if [[ "${@}" > 0 ]]; then
+  if [[ ${@} > 0 ]]; then
     for v in ${@}
     do
       if [[ $v == $toFind ]]; then
@@ -75,7 +75,7 @@ getPoss() {
   shift
   local i=0;
   local p=();
-  if [[ "${@}" > 0 ]]; then
+  if [[ ${@} > 0 ]]; then
     for v in ${@}
     do
       if [[ $v == $toFind ]]; then
@@ -84,7 +84,7 @@ getPoss() {
     i=$((i + 1));
     done;
   fi
-  echo "${p[@]}"
+  echo ${p[@]}
 }
 
 # Project working directory
@@ -113,14 +113,14 @@ for fname in $files
 do
   filenames+=(${fname})
   indices+=($(basename $fname))
-  totalAmountBought+=(0)
-  totalPurchase+=(0)
-  totalRate+=(0)
-  nrOfEntries+=(0)
-  averageRate+=(0)
-  rateDiff+=(0)
-  totalPurchaseCurrValue+=(0)
-  totalPurchaseDiff+=(0)
+  totalAmountBought+=("0")
+  totalPurchase+=("0")
+  totalRate+=("0")
+  nrOfEntries+=("0")
+  averageRate+=("0")
+  rateDiff+=("0")
+  totalPurchaseCurrValue+=("0")
+  totalPurchaseDiff+=("0")
   indiceNames+=("")
 done
 
@@ -150,7 +150,7 @@ if [[ -f ${owned_stock_file} ]]; then
     indicesBought+=(${indice})
     amountsBought+=(${amt})
     tracked+=("0")
-  done < "$owned_stock_file"
+  done < "${owned_stock_file}"
 fi
 
 # Get last known rates
@@ -260,7 +260,6 @@ do
 
   # Adding individual stock tables to email
   if [[ -f ${table_template_file} ]]; then
-    #value=$(eval "echo \"$(cat ${table_template_file})\"")
     echo $(eval "echo \"$(cat ${table_template_file})\"") >> "${email_file}"
   fi
 
@@ -294,7 +293,6 @@ fi
 
 # Adding grand total table to email
 if [[ -f ${grand_table_template_file} ]]; then
-  # value=$(eval "echo \"$(cat ${grand_table_template_file})\"")
   echo $(eval "echo \"$(cat ${grand_table_template_file})\"") >> "${email_file}"
 fi
 
