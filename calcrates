@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Stock-Email-Update
+# CalcRates
+# By Edwin Rietmeijer, 2020
+
+if [[ ${1} == "" ]]; then
+  echo "Usage: ${0} <email-address>"
+  exit 0
+fi
+
 getPos() {
   local toFind="${1}"
   shift
@@ -36,10 +45,10 @@ getPoss() {
 }
 
 # Project working directory
-fileroot="/home/edwin/stock-update-mailer"
+fileroot=$(pwd)
 
 # Email address
-email="your@email.com"
+email=${1}
 
 # Prepare grand total variables
 grandTotalPurchase=0
@@ -78,31 +87,39 @@ done
 indice_names_file="${fileroot}/data/naming/names"
 
 # Get indice names
-while IFS="," read -r ind name
-do
-   if [[ ${indices[@]} =~ ${ind} ]]; then
-     pos=$(getPos ${ind} ${indices[@]})
-     indiceNames[${pos}]=${name}
-   fi
-done < "${indice_names_file}"
+if [[ -f ${indice_names_file} ]]; then
+  while IFS="," read -r ind name
+  do
+     if [[ ${indices[@]} =~ ${ind} ]]; then
+       pos=$(getPos ${ind} ${indices[@]})
+       indiceNames[${pos}]=${name}
+     fi
+   done < "${indice_names_file}"
+fi
 
 # Get owned indices, dates & amount bought
 buyDates=()
 indicesBought=()
 amountsBought=()
-input="${fileroot}/data/user_data/owned"
-while IFS="," read -r d indice amt
-do
-  buyDates+=(${d})
-  indicesBought+=(${indice})
-  amountsBought+=(${amt})
-done < "$input"
+owned_stock_file="${fileroot}/data/user_data/owned"
+if [[ -f ${owned_stock_file} ]]; then
+  while IFS="," read -r d indice amt
+  do
+    buyDates+=(${d})
+    indicesBought+=(${indice})
+    amountsBought+=(${amt})
+  done < "$owned_stock_file"
+fi
 
 lastRate=()
 for fname in ${filenames[@]}
 do
-  readarray -d "," -t strarr <<< $(tail -1 ${fname})
-  lastRate+=($(echo "${strarr[1]}" | tr -d '\n'))
+  if [[ -f ${fname} ]]; then
+    readarray -d "," -t strarr <<< $(tail -1 ${fname})
+    lastRate+=($(echo "${strarr[1]}" | tr -d '\n'))
+  else
+    lastRate+=(0);
+  fi
 done
 
 # Loop through all known indices
@@ -113,43 +130,55 @@ do
     # then get its position
     indPos=$(getPos ${indice} ${indices[@]})
     # Start reading the historic data of that indice
-    while IFS="," read -r d rate
-    do
-      #echo "date ${d}"
-      # If data of a date has been found of when indice that is owned was bought,
-      if [[ ${indicesBought[@]} =~ ${indice} ]] && [[ ${buyDates[@]} =~ ${d} ]]; then
-        # then get the position of the ownership data in their respective arrays
-        bdPoss=$(getPoss ${d} ${buyDates[@]})
-        for bdPos in ${bdPoss[@]}
-        do
-          if [[ ${indicesBought[bdPos]} == ${indice} ]]; then
-            amtBght=${amountsBought[bdPos]}
-            purchase=$(awk '{print $1*$2}' <<< "${amtBght} ${rate}")
-            totalAmountBought[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountBought[indPos]} ${amtBght}")
-            totalPurchase[indPos]=$(awk '{print $1+$2}' <<< "${totalPurchase[indPos]} ${purchase}")
-            grandTotalPurchase=$(awk '{print $1+$2}' <<< "${grandTotalPurchase} ${purchase}")
-            # Needed to calculate average rate
-            totalRate[indPos]=$(awk '{print $1+$2}' <<< "${totalRate[indPos]} ${rate}")
-            nrOfEntries[indPos]=$((nrOfEntries[indPos] + 1))
-          fi
-        done
-      fi
-    done < "${filenames[${indPos}]}"
+    if [[ -f "${filenames[indPos]}" ]]; then
+      while IFS="," read -r d rate
+      do
+        #echo "date ${d}"
+        # If data of a date has been found of when indice that is owned was bought,
+        if [[ ${indicesBought[@]} =~ ${indice} ]] && [[ ${buyDates[@]} =~ ${d} ]]; then
+          # then get the position of the ownership data in their respective arrays
+          bdPoss=$(getPoss ${d} ${buyDates[@]})
+          for bdPos in ${bdPoss[@]}
+          do
+            if [[ ${indicesBought[bdPos]} == ${indice} ]]; then
+              amtBght=${amountsBought[bdPos]}
+              purchase=$(awk '{print $1*$2}' <<< "${amtBght} ${rate}")
+              totalAmountBought[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountBought[indPos]} ${amtBght}")
+              totalPurchase[indPos]=$(awk '{print $1+$2}' <<< "${totalPurchase[indPos]} ${purchase}")
+              grandTotalPurchase=$(awk '{print $1+$2}' <<< "${grandTotalPurchase} ${purchase}")
+              # Needed to calculate average rate
+              totalRate[indPos]=$(awk '{print $1+$2}' <<< "${totalRate[indPos]} ${rate}")
+              nrOfEntries[indPos]=$((nrOfEntries[indPos] + 1))
+            fi
+          done
+        fi
+      done < "${filenames[indPos]}"
+    fi
   fi
 done
 
-i=0;
+# Preparing to render email message
+if [[ -f "${email_file}" ]]; then
+  rm "${email_file}"
+fi
+
 table_template_file="${fileroot}/templates/table_template"
-table_template=$(cat "${table_template_file}")
+if [[ -f "${table_template_file}" ]]; then
+  table_template=$(cat "${table_template_file}")
+fi
 grand_table_template_file="${fileroot}/templates/grand_table_template"
-grand_table_template=$(cat "${grand_table_template_file}")
+if [[ -f "${grand_table_template_file}" ]]; then
+  grand_table_template=$(cat "${grand_table_template_file}")
+fi
 header_template_file="${fileroot}/templates/header_template"
 footer_template_file="${fileroot}/templates/footer_template"
+
 email_file="${fileroot}/email.html"
 
 cat "${header_template_file}" >> "${email_file}"
 
-# Totalling while loop
+# Totalling values
+i=0;
 while [[ ${i} < ${#indices[@]} ]]
 do
   if [[ ${totalRate[i]} != "0" ]] && [[ ${nrOfEntries[i]} != "0" ]]; then
@@ -167,6 +196,7 @@ do
     totalPurchaseDiff=[${i}]=$(awk '{print $1-$2}' <<< "${totalPurchaseValue} ${totalPurchase}")
   fi
 
+  # Adding individual stock tables
   value=$(eval "echo \"$(cat ${table_template_file})\"")
   echo $value >> "${email_file}"
 
@@ -179,13 +209,21 @@ if [[ ${grandTotalValueDiff} != "0" ]] && [[ ${grandTotalPurchase} != "0" ]]; th
   grandTotalValueDiffPercent=$(awk '{print ($1/$2)*100}' <<< "${grandTotalValueDiff} ${grandTotalPurchase}")
 fi
 
+# Adding grand total table
 value=$(eval "echo \"$(cat ${grand_table_template_file})\"")
 echo $value >> "${email_file}"
 
+# Finishing up email rendering
 cat "${footer_template_file}" >> "${email_file}"
 
+# Log values
+if [[ ! -d "${fileroot}/logs" ]]; then
+  mkdir "${fileroot}/logs"
+fi
+(
 echo "---"
 echo "date $(date +%Y.%m.%d)"
+echo "time $(date +%HH:%MM:%SS)"
 echo "indices ${indices[@]}"
 echo "totalAmountBought ${totalAmountBought[@]}"
 echo "totalPurchase ${totalPurchase[@]}"
@@ -200,7 +238,10 @@ echo "grandTotalPurchase ${grandTotalPurchase}"
 echo "grandTotalCurrValue ${grandTotalCurrValue}"
 echo "grandTotalValueDiff ${grandTotalValueDiff}"
 echo "grandTotalValueDiffPercent ${grandTotalValueDiffPercent}"
+) >> "${fileroot}/logs/calcrate.log"
 
+# Send email
+echo "Sending email..."
 (
 echo "From: ${email}";
 echo "To: ${email}";
@@ -209,10 +250,9 @@ echo "Content-Type: text/html";
 echo "MIME-Version: 1.0";
 echo "";
 echo "$(cat ${email_file})";
-) | sendmail -t
+) | /usr/sbin/sendmail -t >> "${fileroot}/logs/calcrate.log" 2>&1
 
-if [[ -f ${email_file} ]]; then
+# Remove sent email render file
+if [[ -f "${email_file}" ]]; then
   rm "${email_file}"
 fi
-
-# TODO: Add error handling for missing files

@@ -1,8 +1,11 @@
 #!/bin/bash
 
+# Stock-Email-Update
+# GetRates
+# By Edwin Rietmeijer, 2020
+
 d=$(date +%Y.%m.%d)
-fileroot="/home/edwin/stock-update-mailer"
-str="EUR"
+fileroot=$(pwd)
 
 if [[ ! -d "${fileroot}/data/rates" ]]; then
   mkdir "${fileroot}/data/rates"
@@ -10,27 +13,25 @@ fi
 
 regex="(Koers).*(EUR)(.*[0-9]+,[0-9]{2}).*(Rendement 1 Dag)"
 
+# For removing undetectable characters
 hexFilter() {
   echo $1 | xxd -g 1 -c 1 | awk '{if ($2 != "c2" && $2 != "a0" && $2 != "0a") print $3}' | tr -d '\n'
 }
 
 scrape=$(curl https://www.morningstar.nl/nl/funds/snapshot/snapshot.aspx?id=F00000YGLU | grep -E "Koers.*EUR")
 if [[ ${scrape} =~ $regex ]]; then
-  data=$(hexFilter ${BASH_REMATCH[3]})
+  data=$(hexFilter ${BASH_REMATCH[3]} | tr "," "." )
 fi
-
 echo "${d},${data}" >> ${fileroot}/data/rates/NL0012125736
 
 scrape=$(curl https://www.morningstar.nl/nl/funds/snapshot/snapshot.aspx?id=F0GBR04B0Q | grep -E "Koers.*EUR")
 if [[ ${scrape} =~ $regex ]]; then
-  data=$(hexFilter ${BASH_REMATCH[3]})
+  data=$(hexFilter ${BASH_REMATCH[3]} | tr "," "." )
 fi
-
 echo "${d},${data}" >> ${fileroot}/data/rates/NL0006311839
 
 scrape=$(curl https://www.morningstar.nl/nl/funds/snapshot/snapshot.aspx?id=F0GBR04B0M | grep -E "Koers.*EUR")
 if [[ ${scrape} =~ $regex ]]; then
-  data=$(hexFilter ${BASH_REMATCH[3]})
+  data=$(hexFilter ${BASH_REMATCH[3]} | tr "," "." )
 fi
-
 echo "${d},${data}" >> ${fileroot}/data/rates/NL0006311821
