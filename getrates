@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Stock-Email-Update
-# GetRates
+# Stock-Update-Mailer
+# GetRates v0.1
 # By Edwin Rietmeijer, 2020
 
 d=$(date +%Y.%m.%d)
