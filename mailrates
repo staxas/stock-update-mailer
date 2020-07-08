@@ -8,9 +8,9 @@ if [[ ${1} == "" ]]; then
   echo "Usage: ${0} <email-addr> [-c <symbol>] [-d <symbol>] [-e <email-addr>] [-s <subject>] [-l <on/off>]"
   echo ""
   echo "Currency symbol (-c) is blank by default"
-  echo "Decimal separator symbol (-s) is ',' by default"
+  echo "Decimal separator symbol (-d) is ',' by default"
   echo "Sender email address (-e) is <email-address> by default"
-  echo "Email subject (-a) is 'Stock update' by default"
+  echo "Email subject (-s) is 'Stock update' by default"
   echo "Logging (-l) is off by default"
   exit 0
 fi
