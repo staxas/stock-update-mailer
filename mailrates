@@ -141,6 +141,7 @@ fi
 buyDates=()
 indicesBought=()
 amountsBought=()
+tracked=()
 owned_stock_file="${fileroot}/data/user_data/owned"
 if [[ -f ${owned_stock_file} ]]; then
   while IFS="," read -r d indice amt
@@ -148,6 +149,7 @@ if [[ -f ${owned_stock_file} ]]; then
     buyDates+=(${d})
     indicesBought+=(${indice})
     amountsBought+=(${amt})
+    tracked+=("0")
   done < "$owned_stock_file"
 fi
 
@@ -182,7 +184,7 @@ do
           for bdPos in ${bdPoss[@]}
           do
             # If the indice being checked was bought on one of the days found matching this indice,
-            if [[ ${indice} == ${indicesBought[bdPos]} ]]; then
+            if [[ ${indice} == ${indicesBought[bdPos]} ]] && [[ ${tracked[bdPos]} == "0" ]]; then
               # then get the data
               purchase=$(awk '{print $1*$2}' <<< "${amountsBought[bdPos]} ${rate}")
               totalAmountBought[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountBought[indPos]} ${amountsBought[bdPos]}")
@@ -191,6 +193,9 @@ do
               # Needed to calculate average rate
               totalRate[indPos]=$(awk '{print $1+$2}' <<< "${totalRate[indPos]} ${rate}")
               nrOfEntries[indPos]=$((nrOfEntries[indPos] + 1))
+              # Set bought stock data as being tracked so it is not counted twice if there are
+              # more than one instances of historic stock rates on the same day
+              tracked[bdPos]="1"
             fi
           done
         fi
