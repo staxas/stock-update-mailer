@@ -21,7 +21,7 @@
             <td>${totalPurchaseDiff[i]}</td>
             <td>${averageRate[i]}</td>
             <td>${lastRate[i]}</td>
-            <td>${rateDiff[i]}</td>
+            <td>${rateDiffPercent[i]}</td>
         </tr>
     </tbody>
 </table>

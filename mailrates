@@ -105,7 +105,7 @@ totalPurchase=()
 totalRate=()
 nrOfEntries=()
 averageRate=()
-rateDiff=()
+rateDiffPercent=()
 totalPurchaseCurrValue=()
 totalPurchaseDiff=()
 indiceNames=()
@@ -118,7 +118,7 @@ do
   totalRate+=("0")
   nrOfEntries+=("0")
   averageRate+=("0")
-  rateDiff+=("0")
+  rateDiffPercent+=("0")
   totalPurchaseCurrValue+=("0")
   totalPurchaseDiff+=("0")
   indiceNames+=("")
@@ -192,6 +192,7 @@ do
               grandTotalPurchase=$(awk '{print $1+$2}' <<< "${grandTotalPurchase} ${purchase}")
               # Needed to calculate average rate
               totalRate[indPos]=$(awk '{print $1+$2}' <<< "${totalRate[indPos]} ${rate}")
+              # Used for logging
               nrOfEntries[indPos]=$((nrOfEntries[indPos] + 1))
               # Set bought stock data as being tracked so it is not counted twice if there are
               # more than one instances of historic stock rates on the same day
@@ -224,12 +225,12 @@ fi
 i=0;
 while [[ ${i} < ${#indices[@]} ]]
 do
-  if [[ ${totalRate[i]} != "0" ]] && [[ ${nrOfEntries[i]} != "0" ]]; then
-    averageRate[${i}]=$(awk '{print $1/$2}' <<< "${totalRate[i]} ${nrOfEntries[i]}")
+  if [[ ${totalRate[i]} != "0" ]] && [[ ${totalAmountBought[i]} != "0" ]]; then
+    averageRate[${i}]=$(awk '{print $1/$2}' <<< "${totalRate[i]} ${totalAmountBought[i]}")
   fi
   if [[ ${averageRate[i]} != "0" ]]; then
     rDiff=$(awk '{print $1-$2}' <<< "${lastRate[i]} ${averageRate[i]}")
-    rateDiff[${i}]=$(awk '{print ($1/$2)*100}' <<< "${rDiff} ${averageRate[i]}")
+    rateDiffPercent[${i}]=$(awk '{print ($1/$2)*100}' <<< "${rDiff} ${averageRate[i]}")
   fi
   if [[ ${totalAmountBought[i]} != "0" ]]; then
     totalPurchaseCurrValue[${i}]=$(awk '{print $1*$2}' <<< "${totalAmountBought[i]} ${lastRate[i]}")
@@ -312,13 +313,12 @@ if [[ ${logging} == "on" ]]; then
   echo "date $(date +%Y.%m.%d)"
   echo "time $(date +%HH:%MM:%SS)"
   echo "indices ${indices[@]}"
+  echo "nrOfEntries ${nrOfEntries[@]}"
   echo "totalAmountBought ${totalAmountBought[@]}"
   echo "totalPurchase ${totalPurchase[@]}"
-  echo "totalRate ${totalRate[@]}"
   echo "averageRate ${averageRate[@]}"
-  echo "nrOfEntries ${nrOfEntries[@]}"
   echo "lastRate ${lastRate[@]}"
-  echo "rateDiff ${rateDiff[@]}"
+  echo "rateDiffPercent ${rateDiffPercent[@]}"
   echo "totalPurchaseCurrValue ${totalPurchaseCurrValue[@]}"
   echo "totalPurchaseDiff ${totalPurchaseDiff[@]}"
   echo "grandTotalPurchase ${grandTotalPurchase}"
