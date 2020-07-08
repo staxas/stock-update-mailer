@@ -191,17 +191,14 @@ if [[ -f "${email_file}" ]]; then
 fi
 
 table_template_file="${fileroot}/templates/table_template"
-if [[ -f "${table_template_file}" ]]; then
-  table_template=$(cat "${table_template_file}")
-fi
 grand_table_template_file="${fileroot}/templates/grand_table_template"
-if [[ -f "${grand_table_template_file}" ]]; then
-  grand_table_template=$(cat "${grand_table_template_file}")
-fi
 header_template_file="${fileroot}/templates/header_template"
 footer_template_file="${fileroot}/templates/footer_template"
 
-cat "${header_template_file}" >> "${email_file}"
+# Add email header
+if [[ -f ${header_template_file} ]]; then
+  cat "${header_template_file}" >> "${email_file}"
+fi
 
 # Totalling values
 i=0;
@@ -242,9 +239,10 @@ do
   fi
 
   # Adding individual stock tables to email
-  value=$(eval "echo \"$(cat ${table_template_file})\"")
-  echo $value >> "${email_file}"
-
+  if [[ -f ${table_template_file} ]]; then
+    value=$(eval "echo \"$(cat ${table_template_file})\"")
+    echo $value >> "${email_file}"
+  fi
   i=$((i + 1))
 done
 
@@ -274,11 +272,15 @@ if [[ $currency != "" ]]; then
 fi
 
 # Adding grand total table to email
-value=$(eval "echo \"$(cat ${grand_table_template_file})\"")
-echo $value >> "${email_file}"
+if [[ -f ${grand_table_template_file} ]]; then
+  value=$(eval "echo \"$(cat ${grand_table_template_file})\"")
+  echo $value >> "${email_file}"
+fi
 
 # Finishing up email rendering
-cat "${footer_template_file}" >> "${email_file}"
+if [[ -f ${grand_table_template_file} ]]; then
+  cat "${grand_table_template_file}" >> "${email_file}"
+fi
 
 # Log values
 if [[ ${logging} == "on" ]]; then
