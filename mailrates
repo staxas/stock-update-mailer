@@ -5,20 +5,24 @@
 # By Edwin Rietmeijer, 2020
 
 if [[ ${1} == "" ]]; then
-  echo "Usage: ${0} <email-address> [-c $] [-s .] [-l on/off]"
+  echo "Usage: ${0} <email-addr> [-c <symbol>] [-d <symbol>] [-e <email-addr>] [-s <subject>] [-l <on/off>]"
   echo ""
   echo "Currency symbol (-c) is blank by default"
-  echo "Separator symbol (-s) is ',' by default"
+  echo "Decimal separator symbol (-s) is ',' by default"
+  echo "Sender email address (-e) is <email-address> by default"
+  echo "Email subject (-a) is 'Stock update' by default"
   echo "Logging (-l) is off by default"
   exit 0
 fi
 
 
 # Email address
-email=${1}
+email_address=${1}
+sender_address=${email_address}
+email_subject="Stock update"
 shift
 
-while getopts ":l:s:c:" opt; do
+while getopts ":l:d:c:e:a:" opt; do
    case ${opt} in
      l )
        if [[ $OPTARG == "on" ]] || [[ $OPTARG == "off" ]]; then
@@ -31,10 +35,16 @@ while getopts ":l:s:c:" opt; do
      c )
        currency=$OPTARG
        ;;
-     s )
+     d )
        separator=$OPTARG
        ;;
-     * )
+     e )
+       sender_address=$OPTARG
+       ;;
+     s )
+       email_subject=$OPTARG
+       ;;
+    * )
        echo "Invalid Option: -$OPTARG " 1>&2
        exit 1
        ;;
@@ -316,21 +326,17 @@ if [[ ${logging} == "on" ]]; then
   ) >> ${fileroot}"/logs/mailrate.log"
 fi
 
-if [[ ${logging} == "on" ]]; then
-  logTo=">> ${fileroot}'/logs/mailrate.log'"
-fi
-
 # Send email
 echo "Sending email..."
 (
-echo "From: ${email}";
-echo "To: ${email}";
-echo "Subject: Fondsen update";
+echo "From: ${sender_address}";
+echo "To: ${email_address}";
+echo "Subject: ${email_subject}";
 echo "Content-Type: text/html";
 echo "MIME-Version: 1.0";
 echo "";
 echo "$(cat ${email_file})";
-) | eval /usr/sbin/sendmail -t $logTo
+) | /usr/sbin/sendmail -t
 
 # Remove sent email render file
 if [[ -f "${email_file}" ]]; then
