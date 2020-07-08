@@ -282,8 +282,8 @@ if [[ -f ${grand_table_template_file} ]]; then
 fi
 
 # Finishing up email rendering
-if [[ -f ${grand_table_template_file} ]]; then
-  cat "${grand_table_template_file}" >> "${email_file}"
+if [[ -f ${footer_template_file} ]]; then
+  cat "${footer_template_file}" >> "${email_file}"
 fi
 
 # Log values
