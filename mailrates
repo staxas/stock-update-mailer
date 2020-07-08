@@ -5,10 +5,10 @@
 # By Edwin Rietmeijer, 2020
 
 if [[ ${1} == "" ]]; then
-  echo "Usage: ${0} <email-address> [-l on/off] [-c '$'] [-s ','] "
+  echo "Usage: ${0} <email-address> [-l on/off] [-c '$'] [-s '.'] "
   echo "Logging (-l) is off by default"
   echo "Currency symbol (-c) is blank by default"
-  echo "Separator symbol (-s) is '.' by default"
+  echo "Separator symbol (-s) is ',' by default"
   exit 0
 fi
 
@@ -229,9 +229,9 @@ do
 
   # Changing currency separator
   if [[ $separator != "" ]]; then
-    totalPurchase[i]=$(tr "." "${separator}" <<< ${totalPurchase[i]})
-    totalPurchaseCurrValue[i]=$(tr "." "${separator}" <<< ${totalPurchaseCurrValue[i]})
-    totalPurchaseDiff[i]=$(tr "." "${separator}" <<< ${totalPurchaseDiff[i]})
+    totalPurchase[i]=$(tr "," "${separator}" <<< ${totalPurchase[i]})
+    totalPurchaseCurrValue[i]=$(tr "," "${separator}" <<< ${totalPurchaseCurrValue[i]})
+    totalPurchaseDiff[i]=$(tr "," "${separator}" <<< ${totalPurchaseDiff[i]})
   fi
 
   # Changing currency sign
@@ -243,8 +243,8 @@ do
 
   # Adding individual stock tables to email
   if [[ -f ${table_template_file} ]]; then
-    value=$(eval "echo \"$(cat ${table_template_file})\"")
-    echo $value >> "${email_file}"
+    #value=$(eval "echo \"$(cat ${table_template_file})\"")
+    echo $(eval "echo \"$(cat ${table_template_file})\"") >> "${email_file}"
   fi
 
   i=$((i + 1))
@@ -263,9 +263,9 @@ grandTotalValueDiff=$(printf "%0.2f\n" $(tr "." "," <<< ${grandTotalValueDiff[i]
 
 # Changing currency separator
 if [[ $separator != "" ]]; then
-  grandTotalPurchase=$(tr "." "${separator}" <<< ${grandTotalPurchase})
-  grandTotalCurrValue=$(tr "." "${separator}" <<< ${grandTotalCurrValue})
-  grandTotalValueDiff=$(tr "." "${separator}" <<< ${grandTotalValueDiff})
+  grandTotalPurchase=$(tr "," "${separator}" <<< ${grandTotalPurchase})
+  grandTotalCurrValue=$(tr "," "${separator}" <<< ${grandTotalCurrValue})
+  grandTotalValueDiff=$(tr "," "${separator}" <<< ${grandTotalValueDiff})
 fi
 
 # Changing currency sign
@@ -277,8 +277,8 @@ fi
 
 # Adding grand total table to email
 if [[ -f ${grand_table_template_file} ]]; then
-  value=$(eval "echo \"$(cat ${grand_table_template_file})\"")
-  echo $value >> "${email_file}"
+  # value=$(eval "echo \"$(cat ${grand_table_template_file})\"")
+  echo $(eval "echo \"$(cat ${grand_table_template_file})\"") >> "${email_file}"
 fi
 
 # Finishing up email rendering
@@ -316,6 +316,8 @@ fi
 if [[ ${logging} == "on" ]]; then
   logTo=">> ${fileroot}'/logs/calcrate.log'"
 fi
+
+echo "$(cat ${email_file})";
 
 # Send email
 echo "Sending email..."
