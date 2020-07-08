@@ -102,7 +102,6 @@ filenames=()
 indices=()
 totalAmountBought=()
 totalPurchase=()
-totalRate=()
 nrOfEntries=()
 averageRate=()
 rateDiffPercent=()
@@ -115,7 +114,6 @@ do
   indices+=($(basename $fname))
   totalAmountBought+=("0")
   totalPurchase+=("0")
-  totalRate+=("0")
   nrOfEntries+=("0")
   averageRate+=("0")
   rateDiffPercent+=("0")
@@ -140,7 +138,7 @@ fi
 # Get owned indices, dates & amounts bought
 buyDates=()
 indicesBought=()
-amountsBought=()
+amountBought=()
 tracked=()
 owned_stock_file="${fileroot}/data/user_data/owned"
 if [[ -f ${owned_stock_file} ]]; then
@@ -148,7 +146,7 @@ if [[ -f ${owned_stock_file} ]]; then
   do
     buyDates+=(${d})
     indicesBought+=(${indice})
-    amountsBought+=(${amt})
+    amountBought+=(${amt})
     tracked+=("0")
   done < "${owned_stock_file}"
 fi
@@ -186,12 +184,10 @@ do
             # If the indice being checked was bought on one of the days found matching this indice,
             if [[ ${indice} == ${indicesBought[bdPos]} ]] && [[ ${tracked[bdPos]} == "0" ]]; then
               # then get the data
-              purchase=$(awk '{print $1*$2}' <<< "${amountsBought[bdPos]} ${rate}")
-              totalAmountBought[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountBought[indPos]} ${amountsBought[bdPos]}")
+              purchase=$(awk '{print $1*$2}' <<< "${amountBought[bdPos]} ${rate}")
+              totalAmountBought[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountBought[indPos]} ${amountBought[bdPos]}")
               totalPurchase[indPos]=$(awk '{print $1+$2}' <<< "${totalPurchase[indPos]} ${purchase}")
               grandTotalPurchase=$(awk '{print $1+$2}' <<< "${grandTotalPurchase} ${purchase}")
-              # Needed to calculate average rate
-              totalRate[indPos]=$(awk '{print $1+$2}' <<< "${totalRate[indPos]} ${rate}")
               # Used for logging
               nrOfEntries[indPos]=$((nrOfEntries[indPos] + 1))
               # Set bought stock data as being tracked so it is not counted twice if there are
@@ -225,8 +221,8 @@ fi
 i=0;
 while [[ ${i} < ${#indices[@]} ]]
 do
-  if [[ ${totalRate[i]} != "0" ]] && [[ ${totalAmountBought[i]} != "0" ]]; then
-    averageRate[${i}]=$(awk '{print $1/$2}' <<< "${totalRate[i]} ${totalAmountBought[i]}")
+  if [[ ${totalPurchase[i]} != "0" ]] && [[ ${totalAmountBought[i]} != "0" ]]; then
+    averageRate[${i}]=$(awk '{print $1/$2}' <<< "${totalPurchase[i]} ${totalAmountBought[i]}")
   fi
   if [[ ${averageRate[i]} != "0" ]]; then
     rDiff=$(awk '{print $1-$2}' <<< "${lastRate[i]} ${averageRate[i]}")
