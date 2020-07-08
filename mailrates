@@ -5,10 +5,11 @@
 # By Edwin Rietmeijer, 2020
 
 if [[ ${1} == "" ]]; then
-  echo "Usage: ${0} <email-address> [-l on/off] [-c '$'] [-s '.'] "
-  echo "Logging (-l) is off by default"
+  echo "Usage: ${0} <email-address> [-c $] [-s .] [-l on/off]"
+  echo ""
   echo "Currency symbol (-c) is blank by default"
   echo "Separator symbol (-s) is ',' by default"
+  echo "Logging (-l) is off by default"
   exit 0
 fi
 
@@ -40,6 +41,7 @@ while getopts ":l:s:c:" opt; do
    esac
  done
 
+# Function to get first index of an item in an array
 getPos() {
   local toFind="${1}"
   shift
@@ -58,6 +60,7 @@ getPos() {
   return;
 }
 
+# Function to get all indexes of an item in an array as an array
 getPoss() {
   local toFind="${1}"
   shift
@@ -125,7 +128,7 @@ if [[ -f ${indice_names_file} ]]; then
    done < "${indice_names_file}"
 fi
 
-# Get owned indices, dates & amount bought
+# Get owned indices, dates & amounts bought
 buyDates=()
 indicesBought=()
 amountsBought=()
@@ -316,8 +319,6 @@ fi
 if [[ ${logging} == "on" ]]; then
   logTo=">> ${fileroot}'/logs/calcrate.log'"
 fi
-
-echo "$(cat ${email_file})";
 
 # Send email
 echo "Sending email..."
