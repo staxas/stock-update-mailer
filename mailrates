@@ -22,7 +22,7 @@ sender_address=${email_address}
 email_subject="Stock update"
 shift
 
-while getopts ":l:d:c:e:a:" opt; do
+while getopts ":l:d:c:e:s:" opt; do
    case ${opt} in
      l )
        if [[ $OPTARG == "on" ]] || [[ $OPTARG == "off" ]]; then
