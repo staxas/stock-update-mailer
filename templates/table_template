@@ -10,14 +10,14 @@
             <td>Total buy</td>
             <td>Total curr val</td>
             <td>Total buy diff</td>
-            <td>Avg Rate</td>
-            <td>Last Rate</td>
-            <td>Rate Diff %</td>
+            <td>Avg buy rate</td>
+            <td>Last rate</td>
+            <td>Rate diff %</td>
         </tr>
         <tr>
             <td>${totalAmountBought[i]}</td>
             <td>${totalPurchase[i]}</td>
-            <td>${totalPurchaseValue[i]}</td>
+            <td>${totalPurchaseCurrValue[i]}</td>
             <td>${totalPurchaseDiff[i]}</td>
             <td>${averageRate[i]}</td>
             <td>${lastRate[i]}</td>
