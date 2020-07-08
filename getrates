@@ -5,7 +5,7 @@
 # By Edwin Rietmeijer, 2020
 
 d=$(date +%Y.%m.%d)
-fileroot=$(pwd)
+fileroot=$(dirname "${0}")
 
 if [[ ! -d "${fileroot}/data/rates" ]]; then
   mkdir "${fileroot}/data/rates"

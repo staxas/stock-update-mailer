@@ -89,8 +89,7 @@ getPoss() {
 }
 
 # Project working directory
-fileroot=$(pwd)
-
+fileroot=$(dirname "${0}")
 # Prepare grand total variables
 grandTotalPurchase=0
 grandTotalCurrValue=0
