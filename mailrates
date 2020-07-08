@@ -139,6 +139,7 @@ if [[ -f ${owned_stock_file} ]]; then
   done < "$owned_stock_file"
 fi
 
+# Get last known rates
 lastRate=()
 for fname in ${filenames[@]}
 do
@@ -161,16 +162,18 @@ do
     if [[ -f "${filenames[indPos]}" ]]; then
       while IFS="," read -r d rate
       do
-        # If data of a date has been found of when indice that is owned was bought,
+        # If the current indice being checked was bought and on the current date being cheked,
         if [[ ${indicesBought[@]} =~ ${indice} ]] && [[ ${buyDates[@]} =~ ${d} ]]; then
-          # then get the position of the ownership data in their respective arrays
+          # then get the positions of this/those date(s) in the ownership arrays
           bdPoss=$(getPoss ${d} ${buyDates[@]})
+          # Loop through the found dates
           for bdPos in ${bdPoss[@]}
           do
-            if [[ ${indicesBought[bdPos]} == ${indice} ]]; then
-              amtBght=${amountsBought[bdPos]}
-              purchase=$(awk '{print $1*$2}' <<< "${amtBght} ${rate}")
-              totalAmountBought[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountBought[indPos]} ${amtBght}")
+            # If the indice being checked was bought on one of the days found matching this indice,
+            if [[ ${indice} == ${indicesBought[bdPos]} ]]; then
+              # then get the data
+              purchase=$(awk '{print $1*$2}' <<< "${amountsBought[bdPos]} ${rate}")
+              totalAmountBought[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountBought[indPos]} ${amountsBought[bdPos]}")
               totalPurchase[indPos]=$(awk '{print $1+$2}' <<< "${totalPurchase[indPos]} ${purchase}")
               grandTotalPurchase=$(awk '{print $1+$2}' <<< "${grandTotalPurchase} ${purchase}")
               # Needed to calculate average rate
@@ -243,7 +246,7 @@ do
     value=$(eval "echo \"$(cat ${table_template_file})\"")
     echo $value >> "${email_file}"
   fi
-  
+
   i=$((i + 1))
 done
 
