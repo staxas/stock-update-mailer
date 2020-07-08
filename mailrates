@@ -313,11 +313,11 @@ if [[ ${logging} == "on" ]]; then
   echo "grandTotalCurrValue ${grandTotalCurrValue}"
   echo "grandTotalValueDiff ${grandTotalValueDiff}"
   echo "grandTotalValueDiffPercent ${grandTotalValueDiffPercent}"
-  ) >> ${fileroot}"/logs/calcrate.log"
+  ) >> ${fileroot}"/logs/mailrate.log"
 fi
 
 if [[ ${logging} == "on" ]]; then
-  logTo=">> ${fileroot}'/logs/calcrate.log'"
+  logTo=">> ${fileroot}'/logs/mailrate.log'"
 fi
 
 # Send email
