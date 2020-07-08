@@ -15,12 +15,11 @@ if [[ ${1} == "" ]]; then
   exit 0
 fi
 
-
 # Email address
 email_address=${1}
+shift
 sender_address=${email_address}
 email_subject="Stock update"
-shift
 
 while getopts ":l:c:d:e:s:" opt; do
    case ${opt} in
@@ -90,6 +89,7 @@ getPoss() {
 
 # Project working directory
 fileroot=$(dirname "${0}")
+
 # Prepare grand total variables
 grandTotalPurchase=0
 grandTotalCurrValue=0
