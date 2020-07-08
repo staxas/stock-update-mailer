@@ -6,6 +6,6 @@ comparisons with their current rate, and grand totals for all stocks being track
 
 Requires sendmail to be installed
 
-You will need to manually adapt the scraper (getrates) to store historic rates, change $fileroot variable in both scripts to match your working directory, and input your email address (it will be used in both the from and to fields)
+You will need to manually adapt the scraper (getrates) to store historic rates
 
 Also examine and remove demo data from data/rates/ data/user_data/owner and data/naming/names

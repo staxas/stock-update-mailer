@@ -5,9 +5,40 @@
 # By Edwin Rietmeijer, 2020
 
 if [[ ${1} == "" ]]; then
-  echo "Usage: ${0} <email-address>"
+  echo "Usage: ${0} <email-address> [-l on/off] [-c '$'] [-s ','] "
+  echo "Logging (-l) is off by default"
+  echo "Currency symbol (-c) is blank by default"
+  echo "Separator symbol (-s) is '.' by default"
   exit 0
 fi
+
+
+# Email address
+email=${1}
+shift
+
+while getopts ":l:s:c:" opt; do
+   case ${opt} in
+     l )
+       if [[ $OPTARG == "on" ]] || [[ $OPTARG == "off" ]]; then
+         logging=$OPTARG
+       else
+         echo "Invalid Option: -$OPTARG , logging can only be 'on' or 'off'" 1>&2
+         exit 1
+       fi
+       ;;
+     c )
+       currency=$OPTARG
+       ;;
+     s )
+       separator=$OPTARG
+       ;;
+     * )
+       echo "Invalid Option: -$OPTARG " 1>&2
+       exit 1
+       ;;
+   esac
+ done
 
 getPos() {
   local toFind="${1}"
@@ -47,9 +78,6 @@ getPoss() {
 # Project working directory
 fileroot=$(pwd)
 
-# Email address
-email=${1}
-
 # Prepare grand total variables
 grandTotalPurchase=0
 grandTotalCurrValue=0
@@ -66,7 +94,7 @@ totalRate=()
 nrOfEntries=()
 averageRate=()
 rateDiff=()
-totalPurchaseValue=()
+totalPurchaseCurrValue=()
 totalPurchaseDiff=()
 indiceNames=()
 for fname in $files
@@ -79,7 +107,7 @@ do
   nrOfEntries+=(0)
   averageRate+=(0)
   rateDiff+=(0)
-  totalPurchaseValue+=(0)
+  totalPurchaseCurrValue+=(0)
   totalPurchaseDiff+=(0)
   indiceNames+=("")
 done
@@ -158,6 +186,7 @@ do
 done
 
 # Preparing to render email message
+email_file="${fileroot}/email.html"
 if [[ -f "${email_file}" ]]; then
   rm "${email_file}"
 fi
@@ -173,8 +202,6 @@ fi
 header_template_file="${fileroot}/templates/header_template"
 footer_template_file="${fileroot}/templates/footer_template"
 
-email_file="${fileroot}/email.html"
-
 cat "${header_template_file}" >> "${email_file}"
 
 # Totalling values
@@ -189,12 +216,32 @@ do
     rateDiff[${i}]=$(awk '{print ($1/$2)*100}' <<< "${rDiff} ${averageRate[i]}")
   fi
   if [[ ${totalAmountBought[i]} != "0" ]]; then
-    totalPurchaseValue[${i}]=$(awk '{print $1*$2}' <<< "${totalAmountBought[i]} ${lastRate[i]}")
-    grandTotalCurrValue=$(awk '{print $1+$2}' <<< "${grandTotalCurrValue} ${totalPurchaseValue[i]}")
+    totalPurchaseCurrValue[${i}]=$(awk '{print $1*$2}' <<< "${totalAmountBought[i]} ${lastRate[i]}")
+    grandTotalCurrValue=$(awk '{print $1+$2}' <<< "${grandTotalCurrValue} ${totalPurchaseCurrValue[i]}")
   fi
-  if [[ ${totalPurchaseValue[i]} != "0" ]] && [[ ${totalPurchase[i]} != "0" ]] ; then
-    totalPurchaseDiff=[${i}]=$(awk '{print $1-$2}' <<< "${totalPurchaseValue} ${totalPurchase}")
+  if [[ ${totalPurchaseCurrValue[i]} != "0" ]] && [[ ${totalPurchase[i]} != "0" ]] ; then
+    totalPurchaseDiff=[${i}]=$(awk '{print $1-$2}' <<< "${totalPurchaseCurrValue} ${totalPurchase}")
   fi
+
+  # Setting two decimal points for currency fields
+  totalPurchase[i]=$(printf "%0.2f\n" $(tr "." "," <<< ${totalPurchase[i]}))
+  totalPurchaseCurrValue[i]=$(printf "%0.2f\n" $(tr "." "," <<< ${totalPurchaseCurrValue[i]}))
+  totalPurchaseDiff[i]=$(printf "%0.2f\n" $(tr "." "," <<< ${totalPurchaseDiff[i]}))
+
+  # Changing currency separator
+  if [[ $separator != "" ]]; then
+    totalPurchase[i]=$(tr "." "${separator}" <<< ${totalPurchase[i]})
+    totalPurchaseCurrValue[i]=$(tr "." "${separator}" <<< ${totalPurchaseCurrValue[i]})
+    totalPurchaseDiff[i]=$(tr "." "${separator}" <<< ${totalPurchaseDiff[i]})
+  fi
+
+  # Changing currency sign
+  if [[ $currency != "" ]]; then
+    totalPurchase[i]="${currency} ${totalPurchase[i]}"
+    totalPurchaseCurrValue[i]="${currency} ${totalPurchaseCurrValue[i]}"
+    totalPurchaseDiff[i]="${currency} ${totalPurchaseDiff[i]}"
+  fi
+
 
   # Adding individual stock tables
   value=$(eval "echo \"$(cat ${table_template_file})\"")
@@ -209,6 +256,25 @@ if [[ ${grandTotalValueDiff} != "0" ]] && [[ ${grandTotalPurchase} != "0" ]]; th
   grandTotalValueDiffPercent=$(awk '{print ($1/$2)*100}' <<< "${grandTotalValueDiff} ${grandTotalPurchase}")
 fi
 
+# Setting two decimal points for currency fields
+grandTotalPurchase=$(printf "%0.2f\n" $(tr "." "," <<< ${grandTotalPurchase[i]}))
+grandTotalCurrValue=$(printf "%0.2f\n" $(tr "." "," <<< ${grandTotalCurrValue[i]}))
+grandTotalValueDiff=$(printf "%0.2f\n" $(tr "." "," <<< ${grandTotalValueDiff[i]}))
+
+# Changing currency separator
+if [[ $separator != "" ]]; then
+  grandTotalPurchase=$(tr "." "${separator}" <<< ${grandTotalPurchase})
+  grandTotalCurrValue=$(tr "." "${separator}" <<< ${grandTotalCurrValue})
+  grandTotalValueDiff=$(tr "." "${separator}" <<< ${grandTotalValueDiff})
+fi
+
+# Changing currency sign
+if [[ $currency != "" ]]; then
+  grandTotalPurchase="${currency} ${grandTotalPurchase}"
+  grandTotalCurrValue="${currency} ${grandTotalCurrValue}"
+  grandTotalValueDiff="${currency} ${grandTotalValueDiff}"
+fi
+
 # Adding grand total table
 value=$(eval "echo \"$(cat ${grand_table_template_file})\"")
 echo $value >> "${email_file}"
@@ -217,28 +283,35 @@ echo $value >> "${email_file}"
 cat "${footer_template_file}" >> "${email_file}"
 
 # Log values
-if [[ ! -d "${fileroot}/logs" ]]; then
-  mkdir "${fileroot}/logs"
+if [[ ${logging} == "on" ]]; then
+  echo "Logging..."
+  if [[ ! -d "${fileroot}/logs" ]]; then
+    mkdir "${fileroot}/logs"
+  fi
+  (
+  echo "---"
+  echo "date $(date +%Y.%m.%d)"
+  echo "time $(date +%HH:%MM:%SS)"
+  echo "indices ${indices[@]}"
+  echo "totalAmountBought ${totalAmountBought[@]}"
+  echo "totalPurchase ${totalPurchase[@]}"
+  echo "totalRate ${totalRate[@]}"
+  echo "averageRate ${averageRate[@]}"
+  echo "nrOfEntries ${nrOfEntries[@]}"
+  echo "lastRate ${lastRate[@]}"
+  echo "rateDiff ${rateDiff[@]}"
+  echo "totalPurchaseCurrValue ${totalPurchaseCurrValue[@]}"
+  echo "totalPurchaseDiff ${totalPurchaseDiff[@]}"
+  echo "grandTotalPurchase ${grandTotalPurchase}"
+  echo "grandTotalCurrValue ${grandTotalCurrValue}"
+  echo "grandTotalValueDiff ${grandTotalValueDiff}"
+  echo "grandTotalValueDiffPercent ${grandTotalValueDiffPercent}"
+  ) >> ${fileroot}"/logs/calcrate.log"
 fi
-(
-echo "---"
-echo "date $(date +%Y.%m.%d)"
-echo "time $(date +%HH:%MM:%SS)"
-echo "indices ${indices[@]}"
-echo "totalAmountBought ${totalAmountBought[@]}"
-echo "totalPurchase ${totalPurchase[@]}"
-echo "totalRate ${totalRate[@]}"
-echo "averageRate ${averageRate[@]}"
-echo "nrOfEntries ${nrOfEntries[@]}"
-echo "lastRate ${lastRate[@]}"
-echo "rateDiff ${rateDiff[@]}"
-echo "totalPurchaseValue ${totalPurchaseValue[@]}"
-echo "totalPurchaseDiff ${totalPurchaseDiff[@]}"
-echo "grandTotalPurchase ${grandTotalPurchase}"
-echo "grandTotalCurrValue ${grandTotalCurrValue}"
-echo "grandTotalValueDiff ${grandTotalValueDiff}"
-echo "grandTotalValueDiffPercent ${grandTotalValueDiffPercent}"
-) >> "${fileroot}/logs/calcrate.log"
+
+if [[ ${logging} == "on" ]]; then
+  logTo=">> ${fileroot}'/logs/calcrate.log'"
+fi
 
 # Send email
 echo "Sending email..."
@@ -250,7 +323,7 @@ echo "Content-Type: text/html";
 echo "MIME-Version: 1.0";
 echo "";
 echo "$(cat ${email_file})";
-) | /usr/sbin/sendmail -t >> "${fileroot}/logs/calcrate.log" 2>&1
+) | eval /usr/sbin/sendmail -t $logTo
 
 # Remove sent email render file
 if [[ -f "${email_file}" ]]; then
