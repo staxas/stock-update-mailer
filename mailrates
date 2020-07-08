@@ -243,6 +243,7 @@ do
     value=$(eval "echo \"$(cat ${table_template_file})\"")
     echo $value >> "${email_file}"
   fi
+  
   i=$((i + 1))
 done
 
