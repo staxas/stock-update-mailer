@@ -335,7 +335,7 @@ echo "Content-Type: text/html";
 echo "MIME-Version: 1.0";
 echo "";
 echo "$(cat ${email_file})";
-) | /usr/sbin/sendmail -t
+) | sendmail -t
 
 # Remove sent email render file
 if [[ -f "${email_file}" ]]; then
