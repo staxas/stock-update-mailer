@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Stock-Update-Mailer
-# CalcRates v0.1
+# MailRates v0.1
 # By Edwin Rietmeijer, 2020
 
 if [[ ${1} == "" ]]; then
