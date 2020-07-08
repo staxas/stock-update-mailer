@@ -161,7 +161,6 @@ do
     if [[ -f "${filenames[indPos]}" ]]; then
       while IFS="," read -r d rate
       do
-        #echo "date ${d}"
         # If data of a date has been found of when indice that is owned was bought,
         if [[ ${indicesBought[@]} =~ ${indice} ]] && [[ ${buyDates[@]} =~ ${d} ]]; then
           # then get the position of the ownership data in their respective arrays
@@ -242,7 +241,7 @@ do
     totalPurchaseDiff[i]="${currency} ${totalPurchaseDiff[i]}"
   fi
 
-  # Adding individual stock tables
+  # Adding individual stock tables to email
   value=$(eval "echo \"$(cat ${table_template_file})\"")
   echo $value >> "${email_file}"
 
@@ -274,7 +273,7 @@ if [[ $currency != "" ]]; then
   grandTotalValueDiff="${currency} ${grandTotalValueDiff}"
 fi
 
-# Adding grand total table
+# Adding grand total table to email
 value=$(eval "echo \"$(cat ${grand_table_template_file})\"")
 echo $value >> "${email_file}"
 
