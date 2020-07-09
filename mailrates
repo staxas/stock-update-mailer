@@ -256,14 +256,14 @@ do
     totalPurchaseDiff=[i]=$(awk '{print $1-$2}' <<< "${totalPurchaseCurrValue[i]} ${totalPurchase[i]}")
   fi
 
-  # Setting two decimal points for currency fields
-  totalPurchase[i]=$(printf "%0.2f\n"  ${totalPurchase[i]/,/.})
-  totalPurchaseCurrValue[i]=$(printf "%0.2f\n" ${totalPurchaseCurrValue[i]/,/.})
-  totalPurchaseDiff[i]=$(printf "%0.2f\n" ${totalPurchaseDiff[i]/,/.})
-  averageRate[i]=$(printf "%0.2f\n" ${averageRate[i]/,/.})
-  lastRate[i]=$(printf "%0.2f\n" ${lastRate[i]/,/.})
+  # Setting two decimal points for currency fields (possible switch needed of , and . depending on locale)
+  totalPurchase[i]=$(printf "%0.2f\n"  ${totalPurchase[i]})
+  totalPurchaseCurrValue[i]=$(printf "%0.2f\n" ${totalPurchaseCurrValue[i]})
+  totalPurchaseDiff[i]=$(printf "%0.2f\n" ${totalPurchaseDiff[i]})
+  averageRate[i]=$(printf "%0.2f\n" ${averageRate[i]})
+  lastRate[i]=$(printf "%0.2f\n" ${lastRate[i]})
 
-  # Changing currency separator
+  # Changing currency separator (possible change needed of . to , depending on locale)
   if [[ $separator != "" ]]; then
     totalPurchase[i]=${totalPurchase[i]/./${separator}}
     totalPurchaseCurrValue[i]=${totalPurchaseCurrValue[i]/./${separator}}
@@ -295,12 +295,12 @@ if [[ ${grandTotalValueDiff} != "0" ]] && [[ ${grandTotalPurchase} != "0" ]]; th
   grandTotalValueDiffPercent=$(awk '{print ($1/$2)*100}' <<< "${grandTotalValueDiff} ${grandTotalPurchase}")
 fi
 
-# Setting two decimal points for currency fields
-grandTotalPurchase=$(printf "%0.2f\n" ${grandTotalPurchase/,/.})
-grandTotalCurrValue=$(printf "%0.2f\n" ${grandTotalCurrValue/,/.})
-grandTotalValueDiff=$(printf "%0.2f\n" ${grandTotalValueDiff/,/.})
+# Setting two decimal points for currency fields (possible switch needed of , and . depending on locale)
+grandTotalPurchase=$(printf "%0.2f\n" ${grandTotalPurchase})
+grandTotalCurrValue=$(printf "%0.2f\n" ${grandTotalCurrValue})
+grandTotalValueDiff=$(printf "%0.2f\n" ${grandTotalValueDiff})
 
-# Changing currency separator
+# Changing currency separator (possible change needed of . to , depending on locale)
 if [[ $separator != "" ]]; then
   grandTotalPurchase=${grandTotalPurchase/./${separator}}
   grandTotalCurrValue=${grandTotalCurrValue/./${separator}}
