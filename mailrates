@@ -87,11 +87,11 @@ getPoss() {
   echo ${p[@]}
 }
 
-# Locale decimal point
-locDec=$(locale decimal_point)
-
 # Project working directory
 fileroot="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+# Locale decimal point
+locDec=$(locale decimal_point)
 
 # Prepare grand total variables
 grandTotalPurchase=0
