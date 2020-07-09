@@ -354,7 +354,7 @@ fi
 
 # Send email
 echo "Sending email..."
-$(/usr/sbin/ssmtp "${email_address}" < "${email_file}")
+$(ssmtp "${email_address}" < "${email_file}")
 
 # Remove sent email render file
 if [[ -f "${email_file}" ]]; then
