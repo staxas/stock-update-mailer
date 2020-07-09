@@ -125,9 +125,8 @@ do
   indiceNames+=("")
 done
 
-indice_names_file="${fileroot}/data/naming/names"
-
 # Get indice names
+indice_names_file="${fileroot}/data/naming/names"
 if [[ -f ${indice_names_file} ]]; then
   while IFS="," read -r ind name
   do
