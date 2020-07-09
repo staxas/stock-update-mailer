@@ -257,11 +257,11 @@ do
   fi
 
   # Setting two decimal points for currency fields
-  totalPurchase[i]=$(printf "%0.2f\n" $(tr "." "," <<< ${totalPurchase[i]}))
-  totalPurchaseCurrValue[i]=$(printf "%0.2f\n" $(tr "." "," <<< ${totalPurchaseCurrValue[i]}))
-  totalPurchaseDiff[i]=$(printf "%0.2f\n" $(tr "." "," <<< ${totalPurchaseDiff[i]}))
-  averageRate[i]=$(printf "%0.2f\n" $(tr "." "," <<< ${averageRate[i]}))
-  lastRate[i]=$(printf "%0.2f\n" $(tr "." "," <<< ${lastRate[i]}))
+  totalPurchase[i]=$(printf "%0.2f\n" $(tr "," "." <<< ${totalPurchase[i]}))
+  totalPurchaseCurrValue[i]=$(printf "%0.2f\n" $(tr "," "." <<< ${totalPurchaseCurrValue[i]}))
+  totalPurchaseDiff[i]=$(printf "%0.2f\n" $(tr "," "." <<< ${totalPurchaseDiff[i]}))
+  averageRate[i]=$(printf "%0.2f\n" $(tr "," "." <<< ${averageRate[i]}))
+  lastRate[i]=$(printf "%0.2f\n" $(tr "," "." <<< ${lastRate[i]}))
 
   # Changing currency separator
   if [[ $separator != "" ]]; then
@@ -296,9 +296,9 @@ if [[ ${grandTotalValueDiff} != "0" ]] && [[ ${grandTotalPurchase} != "0" ]]; th
 fi
 
 # Setting two decimal points for currency fields
-grandTotalPurchase=$(printf "%0.2f\n" $(tr "." "," <<< ${grandTotalPurchase}))
-grandTotalCurrValue=$(printf "%0.2f\n" $(tr "." "," <<< ${grandTotalCurrValue}))
-grandTotalValueDiff=$(printf "%0.2f\n" $(tr "." "," <<< ${grandTotalValueDiff}))
+grandTotalPurchase=$(printf "%0.2f\n" $(tr "," "." <<< ${grandTotalPurchase}))
+grandTotalCurrValue=$(printf "%0.2f\n" $(tr "," "." <<< ${grandTotalCurrValue}))
+grandTotalValueDiff=$(printf "%0.2f\n" $(tr "," "." <<< ${grandTotalValueDiff}))
 
 # Changing currency separator
 if [[ $separator != "" ]]; then
