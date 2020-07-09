@@ -1,7 +1,7 @@
 <table>
     <thead>
         <tr>
-            <th colspan="7">${indiceNames[i]}</th>
+            <th colspan="7">${stockNames[i]}</th>
         </tr>
     </thead>
     <tbody>
