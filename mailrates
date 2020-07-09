@@ -272,7 +272,7 @@ do
     lastRate[i]=${lastRate[i]/./${separator}}
   fi
 
-  # Changing currency sign
+  # Adding currency sign
   if [[ $currency != "" ]]; then
     totalPurchase[i]="${currency} ${totalPurchase[i]}"
     totalPurchaseCurrValue[i]="${currency} ${totalPurchaseCurrValue[i]}"
@@ -307,7 +307,7 @@ if [[ $separator != "" ]]; then
   grandTotalValueDiff=${grandTotalValueDiff/./${separator}}
 fi
 
-# Changing currency sign
+# Adding currency sign
 if [[ $currency != "" ]]; then
   grandTotalPurchase="${currency} ${grandTotalPurchase}"
   grandTotalCurrValue="${currency} ${grandTotalCurrValue}"
