@@ -7,10 +7,10 @@
     </thead>
     <tbody>
         <tr>
-            <td>Grand total purchase</td>
-            <td>Grand total curr value</td>
-            <td>Grand total difference</td>
-            <td>Grand total diff %</td>
+            <td>Total cost</td>
+            <td>Total value</td>
+            <td>Total gain/loss</td>
+            <td>Total difference %</td>
         </tr>
         <tr>
             <td>${grandTotalPurchase}</td>
