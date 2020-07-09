@@ -87,13 +87,8 @@ getPoss() {
   echo ${p[@]}
 }
 
-# Locale decimal point and opposite decimal point
+# Locale decimal point
 locDec=$(locale decimal_point)
-if [[ $locDec == ',' ]]; then
-  oppDec="."
-else
-  oppDec=","
-fi
 
 # Project working directory
 fileroot="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
@@ -263,12 +258,13 @@ do
   if [[ ${totalPurchaseCurrValue[i]} != "0" ]] && [[ ${totalPurchase[i]} != "0" ]] ; then
     totalPurchaseDiff[i]=$(awk '{print $1-$2}' <<< "${totalPurchaseCurrValue[i]} ${totalPurchase[i]}")
   fi
+
   # Setting two decimal points for currency fields
-  totalPurchase[i]=$(printf "%0.2f\n" ${totalPurchase[i]/${oppDec}/${locDec}})
-  totalPurchaseCurrValue[i]=$(printf "%0.2f\n"  ${totalPurchaseCurrValue[i]/${oppDec}/${locDec}})
-  totalPurchaseDiff[i]=$(printf "%0.2f\n"  ${totalPurchaseDiff[i]/${oppDec}/${locDec}})
-  averageRate[i]=$(printf "%0.2f\n" ${averageRate[i]/${oppDec}/${locDec}})
-  lastRate[i]=$(printf "%0.2f\n" ${lastRate[i]/${oppDec}/${locDec}})
+  totalPurchase[i]=$(printf "%0.2f\n" ${totalPurchase[i]/./${locDec}})
+  totalPurchaseCurrValue[i]=$(printf "%0.2f\n"  ${totalPurchaseCurrValue[i]/./${locDec}})
+  totalPurchaseDiff[i]=$(printf "%0.2f\n"  ${totalPurchaseDiff[i]/./${locDec}})
+  averageRate[i]=$(printf "%0.2f\n" ${averageRate[i]/./${locDec}})
+  lastRate[i]=$(printf "%0.2f\n" ${lastRate[i]/./${locDec}})
 
   # Changing currency separator
   if [[ $separator != "" ]]; then
@@ -303,9 +299,9 @@ if [[ ${grandTotalValueDiff} != "0" ]] && [[ ${grandTotalPurchase} != "0" ]]; th
 fi
 
 # Setting two decimal points for currency fields
-grandTotalPurchase=$(printf "%0.2f\n" ${grandTotalPurchase/${oppDec}/${locDec}})
-grandTotalCurrValue=$(printf "%0.2f\n" ${grandTotalCurrValue/${oppDec}/${locDec}})
-grandTotalValueDiff=$(printf "%0.2f\n" ${grandTotalValueDiff/${oppDec}/${locDec}})
+grandTotalPurchase=$(printf "%0.2f\n" ${grandTotalPurchase/./${locDec}})
+grandTotalCurrValue=$(printf "%0.2f\n" ${grandTotalCurrValue/./${locDec}})
+grandTotalValueDiff=$(printf "%0.2f\n" ${grandTotalValueDiff/./${locDec}})
 
 # Changing currency separator
 if [[ $separator != "" ]]; then
