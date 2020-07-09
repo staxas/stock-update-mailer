@@ -87,6 +87,14 @@ getPoss() {
   echo ${p[@]}
 }
 
+# Locale decimal point and opposite decimal point
+locDec=$(locale decimal_point)
+if [[ $locDec == ',' ]]; then
+  oppDec="."
+else
+  oppDec=","
+fi
+
 # Project working directory
 fileroot="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
@@ -255,21 +263,20 @@ do
   if [[ ${totalPurchaseCurrValue[i]} != "0" ]] && [[ ${totalPurchase[i]} != "0" ]] ; then
     totalPurchaseDiff[i]=$(awk '{print $1-$2}' <<< "${totalPurchaseCurrValue[i]} ${totalPurchase[i]}")
   fi
+  # Setting two decimal points for currency fields
+  totalPurchase[i]=$(printf "%0.2f\n" ${totalPurchase[i]/${oppDec}/${locDec}})
+  totalPurchaseCurrValue[i]=$(printf "%0.2f\n"  ${totalPurchaseCurrValue[i]/${oppDec}/${locDec}})
+  totalPurchaseDiff[i]=$(printf "%0.2f\n"  ${totalPurchaseDiff[i]/${oppDec}/${locDec}})
+  averageRate[i]=$(printf "%0.2f\n" ${averageRate[i]/${oppDec}/${locDec}})
+  lastRate[i]=$(printf "%0.2f\n" ${lastRate[i]/${oppDec}/${locDec}})
 
-  # Setting two decimal points for currency fields (possible switch needed of , and . depending on locale)
-  totalPurchase[i]=$(printf "%0.2f\n" $(tr "." "," <<< "${totalPurchase[i]}"))
-  totalPurchaseCurrValue[i]=$(printf "%0.2f\n" $(tr "." "," <<< "${totalPurchaseCurrValue[i]}"))
-  totalPurchaseDiff[i]=$(printf "%0.2f\n" $(tr "." "," <<< "${totalPurchaseDiff[i]}"))
-  averageRate[i]=$(printf "%0.2f\n" $(tr "." "," <<< "${averageRate[i]}"))
-  lastRate[i]=$(printf "%0.2f\n"  $(tr "." "," <<< "${lastRate[i]}"))
-
-  # Changing currency separator (possible change needed of . to , depending on locale)
+  # Changing currency separator
   if [[ $separator != "" ]]; then
-    totalPurchase[i]=$(tr "," ${separator} <<< "${totalPurchase[i]}")
-    totalPurchaseCurrValue[i]=$(tr "," ${separator} <<< "${totalPurchaseCurrValue[i]}")
-    totalPurchaseDiff[i]=$(tr "," ${separator} <<< "${totalPurchaseDiff[i]}")
-    averageRate[i]=$(tr "," ${separator} <<< "${averageRate[i]}")
-    lastRate[i]=$(tr "," ${separator} <<< "${lastRate[i]}")
+    totalPurchase[i]=${totalPurchase[i]/${locDec}/${separator}}
+    totalPurchaseCurrValue[i]=${totalPurchaseCurrValue[i]/${locDec}/${separator}}
+    totalPurchaseDiff[i]=${totalPurchaseDiff[i]/${locDec}/${separator}}
+    averageRate[i]=${averageRate[i]/${locDec}/${separator}}
+    lastRate[i]=${lastRate[i]/${locDec}/${separator}}
   fi
 
   # Adding currency sign
@@ -295,16 +302,16 @@ if [[ ${grandTotalValueDiff} != "0" ]] && [[ ${grandTotalPurchase} != "0" ]]; th
   grandTotalValueDiffPercent=$(awk '{print ($1/$2)*100}' <<< "${grandTotalValueDiff} ${grandTotalPurchase}")
 fi
 
-# Setting two decimal points for currency fields (possible switch needed of , and . depending on locale)
-grandTotalPurchase=$(printf "%0.2f\n" $(tr "." "," <<< "${grandTotalPurchase}"))
-grandTotalCurrValue=$(printf "%0.2f\n" $(tr "." "," <<< "${grandTotalCurrValue}"))
-grandTotalValueDiff=$(printf "%0.2f\n" $(tr "." "," <<< "${grandTotalValueDiff}"))
+# Setting two decimal points for currency fields
+grandTotalPurchase=$(printf "%0.2f\n" ${grandTotalPurchase/${oppDec}/${locDec}})
+grandTotalCurrValue=$(printf "%0.2f\n" ${grandTotalCurrValue/${oppDec}/${locDec}})
+grandTotalValueDiff=$(printf "%0.2f\n" ${grandTotalValueDiff/${oppDec}/${locDec}})
 
-# Changing currency separator (possible change needed of . to , depending on locale)
+# Changing currency separator
 if [[ $separator != "" ]]; then
-  grandTotalPurchase=$(tr "," ${separator} <<< "${grandTotalPurchase}")
-  grandTotalCurrValue=$(tr "," ${separator} <<< "${grandTotalCurrValue}")
-  grandTotalValueDiff=$(tr "," ${separator} <<< "${grandTotalValueDiff}")
+  grandTotalPurchase=${grandTotalPurchase/${locDec}/${separator}}
+  grandTotalCurrValue=${grandTotalCurrValue/${locDec}/${separator}}
+  grandTotalValueDiff=${grandTotalValueDiff/${locDec}/${separator}}
 fi
 
 # Adding currency sign
