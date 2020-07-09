@@ -100,7 +100,7 @@ grandTotalValueDiffPercent=0
 files=$(find "${fileroot}"/data/rates/*)
 filenames=()
 indices=()
-totalAmountBought=()
+totalAmountTraded=()
 totalPurchase=()
 nrOfEntries=()
 averageRate=()
@@ -112,7 +112,7 @@ for fname in $files
 do
   filenames+=(${fname})
   indices+=($(basename $fname))
-  totalAmountBought+=("0")
+  totalAmountTraded+=("0")
   totalPurchase+=("0")
   nrOfEntries+=("0")
   averageRate+=("0")
@@ -135,18 +135,18 @@ if [[ -f ${indice_names_file} ]]; then
    done < "${indice_names_file}"
 fi
 
-# Get owned indices, dates & amounts bought
+# Get owned indices, dates & amounts Traded
 buyDates=()
-indicesBought=()
-amountBought=()
+indicesTraded=()
+amountTraded=()
 tracked=()
 owned_stock_file="${fileroot}/data/user_data/owned"
 if [[ -f ${owned_stock_file} ]]; then
   while IFS="," read -r d indice amt
   do
     buyDates+=(${d})
-    indicesBought+=(${indice})
-    amountBought+=(${amt})
+    indicesTraded+=(${indice})
+    amountTraded+=(${amt})
     tracked+=("0")
   done < "${owned_stock_file}"
 fi
@@ -166,31 +166,40 @@ done
 # Loop through all known indices
 for indice in ${indices[@]}
 do
-  # If one of the indices looped through is known to have been bought,
-  if [[ ${indicesBought[@]} =~ ${indice} ]]; then
+  # If one of the indices looped through is known to have been Traded,
+  if [[ ${indicesTraded[@]} =~ ${indice} ]]; then
     # then get its position
     indPos=$(getPos ${indice} ${indices[@]})
     # Start reading the historic data of that indice
     if [[ -f "${filenames[indPos]}" ]]; then
       while IFS="," read -r d rate
       do
-        # If the current indice being checked was bought and on the current date being cheked,
-        if [[ ${indicesBought[@]} =~ ${indice} ]] && [[ ${buyDates[@]} =~ ${d} ]]; then
+        # If the current indice being checked was Traded and on the current date being cheked,
+        if [[ ${indicesTraded[@]} =~ ${indice} ]] && [[ ${buyDates[@]} =~ ${d} ]]; then
           # then get the positions of this/those date(s) in the ownership arrays
           bdPoss=$(getPoss ${d} ${buyDates[@]})
           # Loop through the found dates
           for bdPos in ${bdPoss[@]}
           do
-            # If the indice being checked was bought on one of the days found matching this indice,
-            if [[ ${indice} == ${indicesBought[bdPos]} ]] && [[ ${tracked[bdPos]} == "0" ]]; then
+            # If the indice being checked was Traded or sold on one of the days found matching this indice,
+            if [[ ${indice} == ${indicesTraded[bdPos]} ]] && [[ ${tracked[bdPos]} == "0" ]]; then
               # then get the data
-              purchase=$(awk '{print $1*$2}' <<< "${amountBought[bdPos]} ${rate}")
-              totalAmountBought[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountBought[indPos]} ${amountBought[bdPos]}")
-              totalPurchase[indPos]=$(awk '{print $1+$2}' <<< "${totalPurchase[indPos]} ${purchase}")
-              grandTotalPurchase=$(awk '{print $1+$2}' <<< "${grandTotalPurchase} ${purchase}")
+              purchase=$(awk '{print $1*$2}' <<< "${amountTraded[bdPos]} ${rate}")
+              totalAmountTraded[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountTraded[indPos]} ${amountTraded[bdPos]}")
+              if (( $(echo "$amountTraded >= 0" | bc -l) )); then
+                # On amount bought
+                totalPurchase[indPos]=$(awk '{print $1+$2}' <<< "${totalPurchase[indPos]} ${purchase}")
+                grandTotalPurchase=$(awk '{print $1+$2}' <<< "${grandTotalPurchase} ${purchase}")
+              else
+                # If stocks have been sold (negative amount), calculate current average rate
+                # and remove from total and grand total purchase at that rate
+                currAverageRate=$(awk '{print $1/$2}' <<< "${totalPurchase[indPos]} ${totalAmountTraded[indPos]}")
+                totalPurchase[indPos]=$(awk '{print $1+($2*$3}' <<< "${totalPurchase[indPos]} ${amountTraded[bdPos]} ${currAverageRate}")
+                grandTotalPurchase=$(awk '{print $1+($2*$3)}' <<< "${grandTotalPurchase} ${amountTraded[bdPos]} ${currAverageRate}")
+              fi
               # Used for logging
               nrOfEntries[indPos]=$((nrOfEntries[indPos] + 1))
-              # Set bought stock data as being tracked so it is not counted twice if there are
+              # Set Traded stock data as being tracked so it is not counted twice if there are
               # more than one instances of historic stock rates on the same day
               tracked[bdPos]="1"
             fi
@@ -207,6 +216,17 @@ if [[ -f "${email_file}" ]]; then
   rm "${email_file}"
 fi
 
+(
+echo "From: ${sender_address}";
+echo "To: ${email_address}";
+echo "Subject: ${email_subject}";
+echo "Content-Type: text/html";
+echo "MIME-Version: 1.0";
+echo "";
+echo "<br/>";
+echo "$(cat ${email_file})";
+) >> "${email_file}"
+
 table_template_file="${fileroot}/templates/table_template"
 grand_table_template_file="${fileroot}/templates/grand_table_template"
 header_template_file="${fileroot}/templates/header_template"
@@ -221,15 +241,15 @@ fi
 i=0;
 while [[ ${i} < ${#indices[@]} ]]
 do
-  if [[ ${totalPurchase[i]} != "0" ]] && [[ ${totalAmountBought[i]} != "0" ]]; then
-    averageRate[${i}]=$(awk '{print $1/$2}' <<< "${totalPurchase[i]} ${totalAmountBought[i]}")
+  if [[ ${totalPurchase[i]} != "0" ]] && [[ ${totalAmountTraded[i]} != "0" ]]; then
+    averageRate[${i}]=$(awk '{print $1/$2}' <<< "${totalPurchase[i]} ${totalAmountTraded[i]}")
   fi
   if [[ ${averageRate[i]} != "0" ]]; then
     rDiff=$(awk '{print $1-$2}' <<< "${lastRate[i]} ${averageRate[i]}")
     rateDiffPercent[${i}]=$(awk '{print ($1/$2)*100}' <<< "${rDiff} ${averageRate[i]}")
   fi
-  if [[ ${totalAmountBought[i]} != "0" ]]; then
-    totalPurchaseCurrValue[${i}]=$(awk '{print $1*$2}' <<< "${totalAmountBought[i]} ${lastRate[i]}")
+  if [[ ${totalAmountTraded[i]} != "0" ]]; then
+    totalPurchaseCurrValue[${i}]=$(awk '{print $1*$2}' <<< "${totalAmountTraded[i]} ${lastRate[i]}")
     grandTotalCurrValue=$(awk '{print $1+$2}' <<< "${grandTotalCurrValue} ${totalPurchaseCurrValue[i]}")
   fi
   if [[ ${totalPurchaseCurrValue[i]} != "0" ]] && [[ ${totalPurchase[i]} != "0" ]] ; then
@@ -308,9 +328,11 @@ if [[ ${logging} == "on" ]]; then
   echo "---"
   echo "date $(date +%Y.%m.%d)"
   echo "time $(date +%HH:%MM:%SS)"
+  echo "whoami $(whoami)"
+  echo "email ${email_address}"
   echo "indices ${indices[@]}"
   echo "nrOfEntries ${nrOfEntries[@]}"
-  echo "totalAmountBought ${totalAmountBought[@]}"
+  echo "totalAmountTraded ${totalAmountTraded[@]}"
   echo "totalPurchase ${totalPurchase[@]}"
   echo "averageRate ${averageRate[@]}"
   echo "lastRate ${lastRate[@]}"
@@ -326,15 +348,7 @@ fi
 
 # Send email
 echo "Sending email..."
-(
-echo "From: ${sender_address}";
-echo "To: ${email_address}";
-echo "Subject: ${email_subject}";
-echo "Content-Type: text/html";
-echo "MIME-Version: 1.0";
-echo "";
-echo "$(cat ${email_file})";
-) | sendmail -t
+$(/usr/sbin/ssmtp "${email_address}" < "${email_file}")
 
 # Remove sent email render file
 if [[ -f "${email_file}" ]]; then

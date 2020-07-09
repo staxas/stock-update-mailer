@@ -15,7 +15,7 @@
             <td>Rate diff %</td>
         </tr>
         <tr>
-            <td>${totalAmountBought[i]}</td>
+            <td>${totalAmountTraded[i]}</td>
             <td>${totalPurchase[i]}</td>
             <td>${totalPurchaseCurrValue[i]}</td>
             <td>${totalPurchaseDiff[i]}</td>

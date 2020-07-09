@@ -11,4 +11,4 @@ You will need to manually adapt the scraper (getrates) to store historic rates.
 
 Also examine and remove demo data from data/rates/ data/user_data/owner and data/naming/names.
 
-Requires sendmail to be installed
+Requires ssmtp to be installed
