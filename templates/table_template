@@ -10,7 +10,7 @@
             <td>Cost</td>
             <td>Value</td>
             <td>Gain/loss</td>
-            <td>Avg rate</td>
+            <td>Avg buy rate</td>
             <td>Last rate</td>
             <td>Rate diff %</td>
         </tr>
