@@ -15,4 +15,6 @@ You will need to manually adapt the scraper (getrates) to store historic rates.
 
 Also examine and remove demo data from data/rates/ data/user_data/owner and data/naming/names.
 
+Has not been tested on other locales than of developer's, see comments for clues on what might need to be changed.
+
 Requires ssmtp to be installed and configured correctly
