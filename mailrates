@@ -197,11 +197,12 @@ do
                 totalPurchase[indPos]=$(awk '{print $1+($2*$3}' <<< "${totalPurchase[indPos]} ${amountTraded[bdPos]} ${currAverageRate}")
                 grandTotalPurchase=$(awk '{print $1+($2*$3)}' <<< "${grandTotalPurchase} ${amountTraded[bdPos]} ${currAverageRate}")
               fi
+              # Set traded stock data as having being tracked so it is not counted twice if there are
+              # more than one instances of historic stock rates on the same day. This means calculations
+              # are done on the first instance of a historic rate on a given date. Subsequent data is ignored.
+              tracked[bdPos]="1"
               # Used for logging
               nrOfEntries[indPos]=$((nrOfEntries[indPos] + 1))
-              # Set Traded stock data as being tracked so it is not counted twice if there are
-              # more than one instances of historic stock rates on the same day
-              tracked[bdPos]="1"
             fi
           done
         fi
@@ -223,7 +224,6 @@ echo "Subject: ${email_subject}";
 echo "Content-Type: text/html";
 echo "MIME-Version: 1.0";
 echo "";
-echo "<br/>";
 echo "$(cat ${email_file})";
 ) >> "${email_file}"
 
@@ -242,18 +242,18 @@ i=0;
 while [[ ${i} < ${#indices[@]} ]]
 do
   if [[ ${totalPurchase[i]} != "0" ]] && [[ ${totalAmountTraded[i]} != "0" ]]; then
-    averageRate[${i}]=$(awk '{print $1/$2}' <<< "${totalPurchase[i]} ${totalAmountTraded[i]}")
+    averageRate[i]=$(awk '{print $1/$2}' <<< "${totalPurchase[i]} ${totalAmountTraded[i]}")
   fi
   if [[ ${averageRate[i]} != "0" ]]; then
     rDiff=$(awk '{print $1-$2}' <<< "${lastRate[i]} ${averageRate[i]}")
-    rateDiffPercent[${i}]=$(awk '{print ($1/$2)*100}' <<< "${rDiff} ${averageRate[i]}")
+    rateDiffPercent[i]=$(awk '{print ($1/$2)*100}' <<< "${rDiff} ${averageRate[i]}")
   fi
   if [[ ${totalAmountTraded[i]} != "0" ]]; then
-    totalPurchaseCurrValue[${i}]=$(awk '{print $1*$2}' <<< "${totalAmountTraded[i]} ${lastRate[i]}")
+    totalPurchaseCurrValue[i]=$(awk '{print $1*$2}' <<< "${totalAmountTraded[i]} ${lastRate[i]}")
     grandTotalCurrValue=$(awk '{print $1+$2}' <<< "${grandTotalCurrValue} ${totalPurchaseCurrValue[i]}")
   fi
   if [[ ${totalPurchaseCurrValue[i]} != "0" ]] && [[ ${totalPurchase[i]} != "0" ]] ; then
-    totalPurchaseDiff=[${i}]=$(awk '{print $1-$2}' <<< "${totalPurchaseCurrValue} ${totalPurchase}")
+    totalPurchaseDiff=[i]=$(awk '{print $1-$2}' <<< "${totalPurchaseCurrValue[i]} ${totalPurchase[i]}")
   fi
 
   # Setting two decimal points for currency fields
@@ -290,9 +290,9 @@ if [[ ${grandTotalValueDiff} != "0" ]] && [[ ${grandTotalPurchase} != "0" ]]; th
 fi
 
 # Setting two decimal points for currency fields
-grandTotalPurchase=$(printf "%0.2f\n" $(tr "." "," <<< ${grandTotalPurchase[i]}))
-grandTotalCurrValue=$(printf "%0.2f\n" $(tr "." "," <<< ${grandTotalCurrValue[i]}))
-grandTotalValueDiff=$(printf "%0.2f\n" $(tr "." "," <<< ${grandTotalValueDiff[i]}))
+grandTotalPurchase=$(printf "%0.2f\n" $(tr "." "," <<< ${grandTotalPurchase}))
+grandTotalCurrValue=$(printf "%0.2f\n" $(tr "." "," <<< ${grandTotalCurrValue}))
+grandTotalValueDiff=$(printf "%0.2f\n" $(tr "." "," <<< ${grandTotalValueDiff}))
 
 # Changing currency separator
 if [[ $separator != "" ]]; then
@@ -328,8 +328,6 @@ if [[ ${logging} == "on" ]]; then
   echo "---"
   echo "date $(date +%Y.%m.%d)"
   echo "time $(date +%HH:%MM:%SS)"
-  echo "whoami $(whoami)"
-  echo "email ${email_address}"
   echo "indices ${indices[@]}"
   echo "nrOfEntries ${nrOfEntries[@]}"
   echo "totalAmountTraded ${totalAmountTraded[@]}"
