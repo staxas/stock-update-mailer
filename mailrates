@@ -90,9 +90,6 @@ getPoss() {
 # Project working directory
 fileroot="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
-# Locale decimal point
-locDec=$(locale decimal_point)
-
 # Prepare grand total variables
 grandTotalPurchase=0
 grandTotalCurrValue=0
@@ -102,7 +99,7 @@ grandTotalValueDiffPercent=0
 # Prepare arrays
 files=$(find "${fileroot}"/data/rates/*)
 filenames=()
-indices=()
+stocks=()
 totalAmountTraded=()
 totalPurchase=()
 nrOfEntries=()
@@ -110,11 +107,11 @@ averageRate=()
 rateDiffPercent=()
 totalPurchaseCurrValue=()
 totalPurchaseDiff=()
-indiceNames=()
+stockNames=()
 for fname in ${files}
 do
   filenames+=("${fname}")
-  indices+=($(basename "${fname}"))
+  stocks+=($(basename "${fname}"))
   totalAmountTraded+=("0")
   totalPurchase+=("0")
   nrOfEntries+=("0")
@@ -122,32 +119,32 @@ do
   rateDiffPercent+=("0")
   totalPurchaseCurrValue+=("0")
   totalPurchaseDiff+=("0")
-  indiceNames+=("")
+  stockNames+=("")
 done
 
-# Get indice names
-indice_names_file="${fileroot}/data/naming/names"
-if [[ -f ${indice_names_file} ]]; then
-  while IFS="," read -r ind name
+# Get stock names
+stock_names_file="${fileroot}/data/naming/names"
+if [[ -f ${stock_names_file} ]]; then
+  while IFS="," read -r stk name
   do
-     if [[ ${indices[@]} =~ ${ind} ]]; then
-       pos=$(getPos ${ind} ${indices[@]})
-       indiceNames[${pos}]=${name}
+     if [[ ${stocks[@]} =~ ${stk} ]]; then
+       pos=$(getPos ${stk} ${stocks[@]})
+       stockNames[${pos}]=${name}
      fi
-   done < "${indice_names_file}"
+   done < "${stock_names_file}"
 fi
 
-# Get owned indices, dates & amounts Traded
+# Get owned stocks, dates & amounts Traded
 buyDates=()
-indicesTraded=()
+stocksTraded=()
 amountTraded=()
 tracked=()
 owned_stock_file="${fileroot}/data/user_data/owned"
 if [[ -f "${owned_stock_file}" ]]; then
-  while IFS="," read -r d indice amt
+  while IFS="," read -r d stock amt
   do
     buyDates+=(${d})
-    indicesTraded+=(${indice})
+    stocksTraded+=(${stock})
     amountTraded+=(${amt})
     tracked+=("0")
   done < "${owned_stock_file}"
@@ -165,26 +162,26 @@ do
   fi
 done
 
-# Loop through all known indices
-for indice in ${indices[@]}
+# Loop through all known stocks
+for stock in ${stocks[@]}
 do
-  # If one of the indices looped through is known to have been Traded,
-  if [[ ${indicesTraded[@]} =~ ${indice} ]]; then
+  # If one of the stocks looped through is known to have been Traded,
+  if [[ ${stocksTraded[@]} =~ ${stock} ]]; then
     # then get its position
-    indPos=$(getPos ${indice} ${indices[@]})
-    # Start reading the historic data of that indice
+    indPos=$(getPos ${stock} ${stocks[@]})
+    # Start reading the historic data of that stock
     if [[ -f "${filenames[indPos]}" ]]; then
       while IFS="," read -r d rate
       do
-        # If the current indice being checked was Traded and on the current date being cheked,
-        if [[ ${indicesTraded[@]} =~ ${indice} ]] && [[ ${buyDates[@]} =~ ${d} ]]; then
+        # If the current stock being checked was Traded and on the current date being cheked,
+        if [[ ${stocksTraded[@]} =~ ${stock} ]] && [[ ${buyDates[@]} =~ ${d} ]]; then
           # then get the positions of this/those date(s) in the ownership arrays
           bdPoss=$(getPoss ${d} ${buyDates[@]})
           # Loop through the found dates
           for bdPos in ${bdPoss[@]}
           do
-            # If the indice being checked was Traded or sold on one of the days found matching this indice,
-            if [[ ${indice} == ${indicesTraded[bdPos]} ]] && [[ ${tracked[bdPos]} == "0" ]]; then
+            # If the stock being checked was Traded or sold on one of the days found matching this stock,
+            if [[ ${stock} == ${stocksTraded[bdPos]} ]] && [[ ${tracked[bdPos]} == "0" ]]; then
               # then get the data
               purchase=$(awk '{print $1*$2}' <<< "${amountTraded[bdPos]} ${rate}")
               totalAmountTraded[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountTraded[indPos]} ${amountTraded[bdPos]}")
@@ -240,8 +237,9 @@ if [[ -f ${header_template_file} ]]; then
 fi
 
 # Totalling values
+locDec=$(locale decimal_point)
 i=0;
-while [[ ${i} < ${#indices[@]} ]]
+while [[ ${i} < ${#stocks[@]} ]]
 do
   if [[ ${totalPurchase[i]} != "0" ]] && [[ ${totalAmountTraded[i]} != "0" ]]; then
     averageRate[i]=$(awk '{print $1/$2}' <<< "${totalPurchase[i]} ${totalAmountTraded[i]}")
@@ -336,7 +334,7 @@ if [[ ${logging} == "on" ]]; then
   echo "---"
   echo "date $(date +%Y.%m.%d)"
   echo "time $(date +%HH:%MM:%SS)"
-  echo "indices ${indices[@]}"
+  echo "stocks ${stocks[@]}"
   echo "nrOfEntries ${nrOfEntries[@]}"
   echo "totalAmountTraded ${totalAmountTraded[@]}"
   echo "totalPurchase ${totalPurchase[@]}"
