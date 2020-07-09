@@ -260,12 +260,16 @@ do
   totalPurchase[i]=$(printf "%0.2f\n" $(tr "." "," <<< ${totalPurchase[i]}))
   totalPurchaseCurrValue[i]=$(printf "%0.2f\n" $(tr "." "," <<< ${totalPurchaseCurrValue[i]}))
   totalPurchaseDiff[i]=$(printf "%0.2f\n" $(tr "." "," <<< ${totalPurchaseDiff[i]}))
+  averageRate[i]=$(printf "%0.2f\n" $(tr "." "," <<< ${averageRate[i]}))
+  lastRate[i]=$(printf "%0.2f\n" $(tr "." "," <<< ${lastRate[i]}))
 
   # Changing currency separator
   if [[ $separator != "" ]]; then
-    totalPurchase[i]=$(tr "," "${separator}" <<< ${totalPurchase[i]})
-    totalPurchaseCurrValue[i]=$(tr "," "${separator}" <<< ${totalPurchaseCurrValue[i]})
-    totalPurchaseDiff[i]=$(tr "," "${separator}" <<< ${totalPurchaseDiff[i]})
+    totalPurchase[i]=$(tr "." "${separator}" <<< ${totalPurchase[i]})
+    totalPurchaseCurrValue[i]=$(tr "." "${separator}" <<< ${totalPurchaseCurrValue[i]})
+    totalPurchaseDiff[i]=$(tr "." "${separator}" <<< ${totalPurchaseDiff[i]})
+    averageRate[i]=$(tr "." "${separator}" <<< ${averageRate[i]})
+    lastRate[i]=$(tr "." "${separator}" <<< ${lastRate[i]})
   fi
 
   # Changing currency sign
@@ -273,6 +277,8 @@ do
     totalPurchase[i]="${currency} ${totalPurchase[i]}"
     totalPurchaseCurrValue[i]="${currency} ${totalPurchaseCurrValue[i]}"
     totalPurchaseDiff[i]="${currency} ${totalPurchaseDiff[i]}"
+    averageRate[i]="${currency} ${averageRate[i]}"
+    lastRate[i]="${currency} ${lastRate[i]}"
   fi
 
   # Adding individual stock tables to email
@@ -296,9 +302,9 @@ grandTotalValueDiff=$(printf "%0.2f\n" $(tr "." "," <<< ${grandTotalValueDiff}))
 
 # Changing currency separator
 if [[ $separator != "" ]]; then
-  grandTotalPurchase=$(tr "," "${separator}" <<< ${grandTotalPurchase})
-  grandTotalCurrValue=$(tr "," "${separator}" <<< ${grandTotalCurrValue})
-  grandTotalValueDiff=$(tr "," "${separator}" <<< ${grandTotalValueDiff})
+  grandTotalPurchase=$(tr "." "${separator}" <<< ${grandTotalPurchase})
+  grandTotalCurrValue=$(tr "." "${separator}" <<< ${grandTotalCurrValue})
+  grandTotalValueDiff=$(tr "." "${separator}" <<< ${grandTotalValueDiff})
 fi
 
 # Changing currency sign
