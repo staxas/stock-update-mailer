@@ -88,7 +88,7 @@ getPoss() {
 }
 
 # Project working directory
-fileroot=$(dirname "${0}")
+fileroot="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 # Prepare grand total variables
 grandTotalPurchase=0
@@ -108,10 +108,10 @@ rateDiffPercent=()
 totalPurchaseCurrValue=()
 totalPurchaseDiff=()
 indiceNames=()
-for fname in $files
+for fname in ${files}
 do
-  filenames+=(${fname})
-  indices+=($(basename $fname))
+  filenames+=("${fname}")
+  indices+=($(basename "${fname}"))
   totalAmountTraded+=("0")
   totalPurchase+=("0")
   nrOfEntries+=("0")
@@ -141,7 +141,7 @@ indicesTraded=()
 amountTraded=()
 tracked=()
 owned_stock_file="${fileroot}/data/user_data/owned"
-if [[ -f ${owned_stock_file} ]]; then
+if [[ -f "${owned_stock_file}" ]]; then
   while IFS="," read -r d indice amt
   do
     buyDates+=(${d})
@@ -155,8 +155,8 @@ fi
 lastRate=()
 for fname in ${filenames[@]}
 do
-  if [[ -f ${fname} ]]; then
-    readarray -d "," -t strarr <<< $(tail -1 ${fname})
+  if [[ -f "${fname}" ]]; then
+    readarray -d "," -t strarr <<< $(tail -1 "${fname}")
     lastRate+=($(echo "${strarr[1]}" | tr -d '\n'))
   else
     lastRate+=(0);
@@ -253,15 +253,15 @@ do
     grandTotalCurrValue=$(awk '{print $1+$2}' <<< "${grandTotalCurrValue} ${totalPurchaseCurrValue[i]}")
   fi
   if [[ ${totalPurchaseCurrValue[i]} != "0" ]] && [[ ${totalPurchase[i]} != "0" ]] ; then
-    totalPurchaseDiff=[i]=$(awk '{print $1-$2}' <<< "${totalPurchaseCurrValue[i]} ${totalPurchase[i]}")
+    totalPurchaseDiff[i]=$(awk '{print $1-$2}' <<< "${totalPurchaseCurrValue[i]} ${totalPurchase[i]}")
   fi
 
   # Setting two decimal points for currency fields (possible switch needed of , and . depending on locale)
-  totalPurchase[i]=$(printf "%0.2f\n"  ${totalPurchase[i]})
-  totalPurchaseCurrValue[i]=$(printf "%0.2f\n" ${totalPurchaseCurrValue[i]})
-  totalPurchaseDiff[i]=$(printf "%0.2f\n" ${totalPurchaseDiff[i]})
-  averageRate[i]=$(printf "%0.2f\n" ${averageRate[i]})
-  lastRate[i]=$(printf "%0.2f\n" ${lastRate[i]})
+  totalPurchase[i]=$(printf "%0.2f\n"  ${totalPurchase[i]/,/.})
+  totalPurchaseCurrValue[i]=$(printf "%0.2f\n" ${totalPurchaseCurrValue[i]/,/.})
+  totalPurchaseDiff[i]=$(printf "%0.2f\n" ${totalPurchaseDiff[i]/,/.})
+  averageRate[i]=$(printf "%0.2f\n" ${averageRate[i]/,/.})
+  lastRate[i]=$(printf "%0.2f\n" ${lastRate[i]/,/.})
 
   # Changing currency separator (possible change needed of . to , depending on locale)
   if [[ $separator != "" ]]; then
@@ -296,9 +296,9 @@ if [[ ${grandTotalValueDiff} != "0" ]] && [[ ${grandTotalPurchase} != "0" ]]; th
 fi
 
 # Setting two decimal points for currency fields (possible switch needed of , and . depending on locale)
-grandTotalPurchase=$(printf "%0.2f\n" ${grandTotalPurchase})
-grandTotalCurrValue=$(printf "%0.2f\n" ${grandTotalCurrValue})
-grandTotalValueDiff=$(printf "%0.2f\n" ${grandTotalValueDiff})
+grandTotalPurchase=$(printf "%0.2f\n" ${grandTotalPurchase/,/.})
+grandTotalCurrValue=$(printf "%0.2f\n" ${grandTotalCurrValue/,/.})
+grandTotalValueDiff=$(printf "%0.2f\n" ${grandTotalValueDiff/,/.})
 
 # Changing currency separator (possible change needed of . to , depending on locale)
 if [[ $separator != "" ]]; then
