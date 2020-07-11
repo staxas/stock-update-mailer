@@ -1,7 +1,7 @@
 # stock-update-mailer
 Get updates on stock movements and changes in owned stock in your email
 
-Sends you html emails with totals of owned stock worth, average of rates of stock owned,
+Sends you html emails with totals of owned stock worth, average of buy rates of stock owned,
 comparisons with their current rate, and grand totals for all stocks being tracked.
 
 Note: the programs are aimed at calculating mailable stock data only once per day (original goal of this
