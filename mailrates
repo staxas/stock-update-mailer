@@ -65,8 +65,7 @@ getPos() {
     i=$((i + 1));
     done;
   fi
-  echo "-1";
-  return;
+  echo -1;
 }
 
 # Function to get all indexes of an item in an array as an array
@@ -129,12 +128,12 @@ stock_names_file="${fileroot}/data/naming/names"
 if [[ -f ${stock_names_file} ]]; then
   while IFS="," read -r stk order name
   do
-     if [[ ${stocks[@]} =~ ${stk} ]]; then
-       pos=$(getPos ${stk} ${stocks[@]})
-       stockNames[${pos}]=${name}
-       stockOrder[${order}]=${pos}
-     fi
-   done < "${stock_names_file}"
+    pos=$(getPos ${stk} ${stocks[@]})
+    if [[ $pos != "-1" ]]; then
+      stockNames[${pos}]=${name}
+      stockOrder[${order}]=${pos}
+    fi
+  done < "${stock_names_file}"
 fi
 
 # Get owned stocks, dates & amounts Traded
@@ -168,46 +167,43 @@ done
 # Loop through all known stocks
 for stock in ${stocks[@]}
 do
-  # If one of the stocks looped through is known to have been Traded,
-  if [[ ${stocksTraded[@]} =~ ${stock} ]]; then
-    # then get its position
-    indPos=$(getPos ${stock} ${stocks[@]})
-    # Start reading the historic data of that stock
+  # Try to get the position of the current stock being checked
+  indPos=$(getPos ${stock} ${stocks[@]})
+  if [[ ${indPos} != -1 ]]; then
+  # Start reading the historic data of that stock
     if [[ -f "${filenames[indPos]}" ]]; then
       while IFS="," read -r d rate
       do
-        # If the current stock being checked was Traded and on the current date being cheked,
-        if [[ ${stocksTraded[@]} =~ ${stock} ]] && [[ ${buyDates[@]} =~ ${d} ]]; then
-          # then get the positions of this/those date(s) in the ownership arrays
-          bdPoss=$(getPoss ${d} ${buyDates[@]})
-          # Loop through the found dates
-          for bdPos in ${bdPoss[@]}
-          do
-            # If the stock being checked was Traded or sold on one of the days found matching this stock,
-            if [[ ${stock} == ${stocksTraded[bdPos]} ]] && [[ ${tracked[bdPos]} == "0" ]]; then
-              # then get the data
-              purchase=$(awk '{print $1*$2}' <<< "${amountTraded[bdPos]} ${rate}")
-              totalAmountTraded[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountTraded[indPos]} ${amountTraded[bdPos]}")
-              if (( $(echo "$amountTraded >= 0" | bc -l) )); then
-                # On amount bought
-                totalPurchase[indPos]=$(awk '{print $1+$2}' <<< "${totalPurchase[indPos]} ${purchase}")
-                grandTotalPurchase=$(awk '{print $1+$2}' <<< "${grandTotalPurchase} ${purchase}")
-              else
-                # If stocks have been sold (negative amount), calculate current average rate
-                # and remove from total and grand total purchase at that rate
-                currAverageRate=$(awk '{print $1/$2}' <<< "${totalPurchase[indPos]} ${totalAmountTraded[indPos]}")
-                totalPurchase[indPos]=$(awk '{print $1+($2*$3}' <<< "${totalPurchase[indPos]} ${amountTraded[bdPos]} ${currAverageRate}")
-                grandTotalPurchase=$(awk '{print $1+($2*$3)}' <<< "${grandTotalPurchase} ${amountTraded[bdPos]} ${currAverageRate}")
-              fi
-              # Set traded stock data as having being tracked so it is not counted twice if there are
-              # more than one instances of historic stock rates on the same day. This means calculations
-              # are done on the first instance of a historic rate on a given date. Subsequent data is ignored.
-              tracked[bdPos]="1"
-              # Used for logging
-              nrOfEntries[indPos]=$((nrOfEntries[indPos] + 1))
+        # If the current stock being checked was traded and on the current date being cheked,
+        # then try to get the positions of this/those date(s) in the ownership arrays
+        bdPoss=$(getPoss ${d} ${buyDates[@]})
+        # Loop through the found dates (if any)
+        for bdPos in ${bdPoss[@]}
+        do
+          # If the stock being checked was bought or sold on one of the days found matching this stock,
+          if [[ ${stock} == ${stocksTraded[bdPos]} ]] && [[ ${tracked[bdPos]} == "0" ]]; then
+            # then get the data
+            purchase=$(awk '{print $1*$2}' <<< "${amountTraded[bdPos]} ${rate}")
+            totalAmountTraded[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountTraded[indPos]} ${amountTraded[bdPos]}")
+            if (( $(echo "$amountTraded >= 0" | bc -l) )); then
+              # On amount bought, do this
+              totalPurchase[indPos]=$(awk '{print $1+$2}' <<< "${totalPurchase[indPos]} ${purchase}")
+              grandTotalPurchase=$(awk '{print $1+$2}' <<< "${grandTotalPurchase} ${purchase}")
+            else
+              # If stocks have been sold (negative amount), calculate current average rate
+              # and remove from total and grand total purchase at that rate
+              currAverageRate=$(awk '{print $1/$2}' <<< "${totalPurchase[indPos]} ${totalAmountTraded[indPos]}")
+              totalPurchase[indPos]=$(awk '{print $1+($2*$3}' <<< "${totalPurchase[indPos]} ${amountTraded[bdPos]} ${currAverageRate}")
+              grandTotalPurchase=$(awk '{print $1+($2*$3)}' <<< "${grandTotalPurchase} ${amountTraded[bdPos]} ${currAverageRate}")
             fi
-          done
-        fi
+            # Set traded stock data as having being tracked so it is not counted twice if there are
+            # more than one instances of historic stock rates on the same day. This means calculations
+            # are done on the first instance of a historic rate on a given date. Subsequent data is ignored.
+            tracked[bdPos]="1"
+            # Used for logging
+            nrOfEntries[indPos]=$((nrOfEntries[indPos] + 1))
+          fi
+        done
       done < "${filenames[indPos]}"
     fi
   fi
