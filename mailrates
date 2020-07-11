@@ -127,14 +127,12 @@ done
 # Get stock names
 stock_names_file="${fileroot}/data/naming/names"
 if [[ -f ${stock_names_file} ]]; then
-  i=0;
   while IFS="," read -r stk order name
   do
      if [[ ${stocks[@]} =~ ${stk} ]]; then
        pos=$(getPos ${stk} ${stocks[@]})
        stockNames[${pos}]=${name}
        stockOrder[${order}]=${pos}
-       i=$((i + 1))
      fi
    done < "${stock_names_file}"
 fi
