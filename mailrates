@@ -131,10 +131,9 @@ if [[ -f ${stock_names_file} ]]; then
   while IFS="," read -r stk order name
   do
      if [[ ${stocks[@]} =~ ${stk} ]]; then
-       echo "yes: ${i}"
        pos=$(getPos ${stk} ${stocks[@]})
        stockNames[${pos}]=${name}
-       stockOrder[${pos}]=${i}
+       stockOrder[${order}]=${pos}
        i=$((i + 1))
      fi
    done < "${stock_names_file}"
