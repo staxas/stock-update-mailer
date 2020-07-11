@@ -244,8 +244,6 @@ fi
 
 # Totalling values and rendering tables to email
 locDec=$(locale decimal_point)
-# i=0;
-echo ${stockOrder[@]}
 for i in ${stockOrder[@]}
 do
   if [[ ${totalPurchase[i]} != "0" ]] && [[ ${totalAmountTraded[i]} != "0" ]]; then
@@ -296,8 +294,6 @@ do
   if [[ -f ${table_template_file} ]]; then
     echo $(eval "echo \"$(cat ${table_template_file})\"") >> "${email_file}"
   fi
-
-  # i=$((i + 1))
 done
 
 grandTotalValueDiff=$(awk '{print ($1-$2)}' <<< "${grandTotalCurrValue} ${grandTotalPurchase}")
