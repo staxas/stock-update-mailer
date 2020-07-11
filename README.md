@@ -16,4 +16,6 @@ You will need to manually adapt the scraper (getrates) to store historic rates.
 
 Also examine and remove demo data from data/rates/ data/user_data/owner and data/naming/names.
 
+When ordering stocks in naming/names, always use increments of 1 starting at 0 and never use the same number twice.
+
 Requires ssmtp to be installed and configured correctly
