@@ -4,13 +4,13 @@ Get updates on stock movements and changes in owned stock in your email
 Sends you html emails with totals of owned stock worth, average of buy rates of stock owned,
 comparisons with their current rate, and grand totals for all stocks being tracked.
 
-Note: the programs are aimed at calculating mailable stock data only once per day (original goal of this
-project is to monitor long-term indice-based investments). When scraping stock data multiple times a day,
-only the first rate of that day will be used to calculate email data (with the exception of the 'last rates'
-numbers, which are always sourced from the rate last added to the rates data files). This works best when
-running getrates only once on a given day before buying stock (with only one moment of purchase on that day),
-and then having it run scheduled at the end of the day before sending the actual email with mailrates so it
-contains the latest rates.
+Note: the programs are aimed at calculating value of mailable stock information by collecting the buy rates
+only once per day (original goal of this project is to monitor long-term indice-based investments).
+When scraping stock data multiple times a day, only the first rate of that day will be used to calculate
+email data (with the exception of the 'last rates' numbers, which are always sourced from the rate last added
+to the rates data files). These scripts only work when running getrates only once on a given day before buying stock
+(with only one moment of purchase on that day), and then having it run scheduled at the end of the day before
+sending the actual email with mailrates so it contains the latest rates.
 
 You will need to manually adapt the scraper (getrates) to store historic rates.
 
