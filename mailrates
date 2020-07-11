@@ -256,6 +256,10 @@ do
     totalPurchaseDiff[i]=$(awk '{print $1-$2}' <<< "${totalPurchaseCurrValue[i]} ${totalPurchase[i]}")
   fi
 
+  # Setting three decimal points for percentage fields
+  rateDiffPercent[i]=$(printf "%0.3f\n" ${rateDiffPercent[i]/./${locDec}})
+  rateDiffPercent[i]=${rateDiffPercent[i]/${locDec}/.}
+
   # Setting two decimal points for currency fields
   totalPurchase[i]=$(printf "%0.2f\n" ${totalPurchase[i]/./${locDec}})
   totalPurchaseCurrValue[i]=$(printf "%0.2f\n"  ${totalPurchaseCurrValue[i]/./${locDec}})
@@ -294,6 +298,10 @@ grandTotalValueDiff=$(awk '{print ($1-$2)}' <<< "${grandTotalCurrValue} ${grandT
 if [[ ${grandTotalValueDiff} != "0" ]] && [[ ${grandTotalPurchase} != "0" ]]; then
   grandTotalValueDiffPercent=$(awk '{print ($1/$2)*100}' <<< "${grandTotalValueDiff} ${grandTotalPurchase}")
 fi
+
+# Setting three decimal points for percentage fields
+grandTotalValueDiffPercent=$(printf "%0.3f\n" ${grandTotalValueDiffPercent/./${locDec}})
+grandTotalValueDiffPercent=${grandTotalValueDiffPercent/${locDec}/.}
 
 # Setting two decimal points for currency fields
 grandTotalPurchase=$(printf "%0.2f\n" ${grandTotalPurchase/./${locDec}})
