@@ -108,6 +108,7 @@ rateDiffPercent=()
 totalPurchaseCurrValue=()
 totalPurchaseDiff=()
 stockNames=()
+stockOrder=()
 for fname in ${files}
 do
   filenames+=("${fname}")
@@ -120,16 +121,21 @@ do
   totalPurchaseCurrValue+=("0")
   totalPurchaseDiff+=("0")
   stockNames+=("")
+  stockOrder+=("")
 done
 
 # Get stock names
 stock_names_file="${fileroot}/data/naming/names"
 if [[ -f ${stock_names_file} ]]; then
-  while IFS="," read -r stk name
+  i=0;
+  while IFS="," read -r stk order name
   do
      if [[ ${stocks[@]} =~ ${stk} ]]; then
+       echo "yes: ${i}"
        pos=$(getPos ${stk} ${stocks[@]})
        stockNames[${pos}]=${name}
+       stockOrder[${pos}]=${i}
+       i=$((i + 1))
      fi
    done < "${stock_names_file}"
 fi
@@ -236,10 +242,11 @@ if [[ -f ${header_template_file} ]]; then
   cat "${header_template_file}" >> "${email_file}"
 fi
 
-# Totalling values
+# Totalling values and rendering tables to email
 locDec=$(locale decimal_point)
-i=0;
-while [[ ${i} < ${#stocks[@]} ]]
+# i=0;
+echo ${stockOrder[@]}
+for i in ${stockOrder[@]}
 do
   if [[ ${totalPurchase[i]} != "0" ]] && [[ ${totalAmountTraded[i]} != "0" ]]; then
     averageRate[i]=$(awk '{print $1/$2}' <<< "${totalPurchase[i]} ${totalAmountTraded[i]}")
@@ -290,7 +297,7 @@ do
     echo $(eval "echo \"$(cat ${table_template_file})\"") >> "${email_file}"
   fi
 
-  i=$((i + 1))
+  # i=$((i + 1))
 done
 
 grandTotalValueDiff=$(awk '{print ($1-$2)}' <<< "${grandTotalCurrValue} ${grandTotalPurchase}")

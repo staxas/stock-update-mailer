@@ -37,3 +37,9 @@ if [[ ${scrape} =~ $regex ]]; then
   data=$(hexFilter ${BASH_REMATCH[3]} | tr "," "." )
 fi
 echo "${d},${data}" >> ${fileroot}/data/rates/NL0006311821
+
+scrape=$(curl https://www.morningstar.nl/nl/funds/snapshot/snapshot.aspx?id=F0GBR04B1D | grep -E "Koers.*EUR")
+if [[ ${scrape} =~ $regex ]]; then
+  data=$(hexFilter ${BASH_REMATCH[3]} | tr "," "." )
+fi
+echo "${d},${data}" >> ${fileroot}/data/rates/NL0006311771
