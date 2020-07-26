@@ -59,17 +59,8 @@ else
   echo "${stock_names_file} does not exist"
 fi
 
-i=1
-for stockIndex in ${stockOrder[@]}
-do
-  echo ${i} ${stockNames[${stockIndex}]}
-  i=$((i+1))
-done
-
-
 while [[ ${allInputCorrect} != "1" ]]
   do
-
   # List available stock
   i=1
   for stockIndex in ${stockOrder[@]}
@@ -96,9 +87,10 @@ while [[ ${allInputCorrect} != "1" ]]
   stockToAdd=$((stockToAdd-1))
 
   errCode=1
-  echo "For which date do you want to add stock? e.g. '2020.09.31'"
   while  [[ ${rateOnDate} == "" ]];
   do
+    tryCurrDate=0
+    echo "For which date do you want to add stock? e.g. '2020.09.31'"
     read -p "(leave blank for today, q to quit): " dateToAdd
     errCode=1
     while [[ ${errCode} != "0" ]]
@@ -108,6 +100,7 @@ while [[ ${allInputCorrect} != "1" ]]
       fi
       if [[ ${dateToAdd} == "" ]]; then
         dateToAdd=$(date +%Y.%m.%d)
+        tryCurrDate=1
       fi
       # Check if input date is correct
       date -d"${dateToAdd//./}" '+%A %B %d %Y' > /dev/null 2>&1
@@ -130,6 +123,16 @@ while [[ ${allInputCorrect} != "1" ]]
     fi
     if [[ ${rateOnDate} == "" ]]; then
       echo "No rate data for that date"
+      if [[ ${tryCurrDate} == "1" ]]; then
+        echo "You do not have today's stock data, do you want to run 'getrates'?"
+        read -p "(y/n, q to quit): " runGetRates
+        if [[ ${runGetRates} == "q" ]]; then
+          exit 0;
+        fi
+        if [[ ${runGetRates} == "y" ]]; then
+          $(/bin/bash "${fileroot}/getrates")
+        fi
+      fi
     fi
   done
   totalOwned=0
