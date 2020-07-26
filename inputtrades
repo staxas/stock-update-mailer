@@ -191,5 +191,5 @@ while [[ ${allInputCorrect} != "1" ]]
 done
 
 lineToAdd="${dateToAdd},${stocks[${stockOrder[${stockToAdd}]}]},${unitsToTrade}"
-echo ${lineToAdd} >> ${owned_stock_file}
+echo ${lineToAdd} >> "${owned_stock_file}"
 echo "Transaction added"
