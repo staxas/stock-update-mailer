@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Stock-Update-Mailer
+# InputTrades v0.1
+# By Edwin Rietmeijer, 2020
+
 # Function to get first index of an item in an array
 getPos() {
   local toFind=${1}
@@ -21,6 +25,10 @@ d=$(date +%Y.%m.%d)
 # Project working directory
 fileroot="$( cd "$(dirname "$0")" || exit >/dev/null 2>&1 ; pwd -P )"
 
+# Working files
+stock_names_file="${fileroot}/data/naming/names"
+owned_stock_file="${fileroot}/data/user_data/owned"
+
 # Prepare arrays
 files=$(find "${fileroot}"/data/rates/*)
 filenames=()
@@ -36,7 +44,6 @@ do
 done
 
 # Get stock names
-stock_names_file="${fileroot}/data/naming/names"
 i=0
 if [[ -f ${stock_names_file} ]]; then
   while IFS="," read -r stk order name
@@ -125,7 +132,6 @@ while [[ ${allInputCorrect} != "1" ]]
       echo "No rate data for that date"
     fi
   done
-  owned_stock_file="${fileroot}/data/user_data/owned"
   totalOwned=0
   isCurrentDate=0
   if [[ -f "${owned_stock_file}" ]]; then
@@ -182,7 +188,5 @@ while [[ ${allInputCorrect} != "1" ]]
 done
 
 lineToAdd="${dateToAdd},${stocks[${stockOrder[${stockToAdd}]}]},${unitsToTrade}"
-owned_stock_file="${fileroot}/data/user_data/owned"
-
 echo ${lineToAdd} >> ${owned_stock_file}
 echo "Transaction added"
