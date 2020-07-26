@@ -102,7 +102,7 @@ while [[ ${allInputCorrect} != "1" ]]
       if [[ ${dateToAdd} == "" ]]; then
         dateToAdd=$(date +%Y.%m.%d)
       fi
-      echo $dateToAdd
+      # Check if input date is correct
       date -d"${dateToAdd//./}" '+%A %B %d %Y' > /dev/null 2>&1
       errCode=$?
       if [[ ${errCode} != '0' ]]; then
@@ -184,5 +184,5 @@ done
 lineToAdd="${dateToAdd},${stocks[${stockOrder[${stockToAdd}]}]},${unitsToTrade}"
 owned_stock_file="${fileroot}/data/user_data/owned"
 
-#echo ${lineToAdd} >> ${owned_stock_file}
+echo ${lineToAdd} >> ${owned_stock_file}
 echo "Transaction added"
