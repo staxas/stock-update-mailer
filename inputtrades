@@ -28,9 +28,9 @@ fileroot="$( cd "$(dirname "$0")" || exit >/dev/null 2>&1 ; pwd -P )"
 # Working files
 stock_names_file="${fileroot}/data/naming/names"
 owned_stock_file="${fileroot}/data/user_data/owned"
+files=$(find "${fileroot}"/data/rates/*)
 
 # Prepare arrays
-files=$(find "${fileroot}"/data/rates/*)
 filenames=()
 stocks=()
 stockNames=()
@@ -86,13 +86,12 @@ while [[ ${allInputCorrect} != "1" ]]
 
   stockToAdd=$((stockToAdd-1))
 
-  errCode=1
   while  [[ ${rateOnDate} == "" ]];
   do
     tryCurrDate=0
-    echo "For which date do you want to add stock? e.g. '2020.09.31'"
-    read -p "(leave blank for today, q to quit): " dateToAdd
     errCode=1
+    echo "For which date do you want to trade stock? e.g. '2020.09.31'"
+    read -p "(leave blank for today, q to quit): " dateToAdd
     while [[ ${errCode} != "0" ]]
     do
       if [[ ${dateToAdd} == "q" ]]; then
@@ -158,19 +157,21 @@ while [[ ${allInputCorrect} != "1" ]]
   do
     validUnitInput=1
     read -p "(a to sell all, q to quit): " unitsToTrade
+    maximumToSell=$(awk '{print $1*-1}' <<< "${totalOwned}")
+
     if [[ ${unitsToTrade} == "q" ]]; then
       exit 0;
     fi
     if [[ ${unitsToTrade} == "a" ]]; then
-      unitsToTrade=${totalOwned}
+      unitsToTrade=${maximumToSell}
     fi
+
     unitsToTrade=${unitsToTrade/,/.}
     regex='^[+-]?[0-9]+([.][0-9]+)?$'
     if ! [[ ${unitsToTrade} =~ ${regex} ]] ; then
        echo "Not a number"
        validUnitInput=0
     fi
-    maximumToSell=$(awk '{print $1*-1}' <<< "${totalOwned}")
 
     enoughToTrade=$(awk '{if ($1 >= $2) print 1}' <<< "${unitsToTrade} ${maximumToSell}")
     if [[ $enoughToTrade != "1" ]]; then
@@ -178,8 +179,16 @@ while [[ ${allInputCorrect} != "1" ]]
       validUnitInput=0
     fi
   done
+
+  isBuyOrSale==$(awk '{if ($1 >= 0) print 1}' <<< "${unitsToTrade}")
+  if [[ ${isBuyOrSale} == "1" ]]; then
+    buyOrSell="purchase"
+  else
+    buyOrSell="sale"
+  fi
+  tradeValue=$(awk '{print $1*$2}' <<< "${unitsToTrade} ${rateOnDate}")
   echo
-  echo "You have made a total trade of" ${unitsToTrade} "units of" ${stockNames[${stockOrder[${stockToAdd}]}]} "worth "$(awk '{print $1*$2}' <<< "${unitsToTrade} ${rateOnDate}") on ${displayDate}
+  echo "You have made a total ${buyOrSell} of ${unitsToTrade} units of ${stockNames[${stockOrder[${stockToAdd}]}]} worth ${tradeValue} on ${displayDate}" | fold -s
   echo "Is that correct?"
   read -p "(y/n, q to quit): " isCorrect
   if [[ ${isCorrect} == "q" ]]; then
@@ -191,5 +200,6 @@ while [[ ${allInputCorrect} != "1" ]]
 done
 
 lineToAdd="${dateToAdd},${stocks[${stockOrder[${stockToAdd}]}]},${unitsToTrade}"
-echo ${lineToAdd} >> "${owned_stock_file}"
+#echo ${lineToAdd} >> "${owned_stock_file}"
+echo ${lineToAdd}
 echo "Transaction added"
