@@ -86,6 +86,7 @@ while [[ ${allInputCorrect} != "1" ]]
 
   stockToAdd=$((stockToAdd-1))
 
+  echo
   while  [[ ${rateOnDate} == "" ]];
   do
     tryCurrDate=0
@@ -149,12 +150,17 @@ while [[ ${allInputCorrect} != "1" ]]
       fi
     done < "${owned_stock_file}"
   fi
-  if [[ ${rateOnDate} == $(date +%Y.%m.%d) ]]; then
+  if [[ ${dateToAdd} == $(date +%Y.%m.%d) ]]; then
     isWas="is"
+    ownOwned="own"
+    thisThat="this"
   else
     isWas="was"
+    ownOwned="owned"
+    thisThat="that"
   fi
-  echo "The rate on ${displayDate} ${isWas} ${rateOnDate} and you owned ${totalOwned} units of the selected stock on that day"
+  echo
+  echo "The rate on ${displayDate} ${isWas} ${rateOnDate} and you ${ownOwned} ${totalOwned} units of the selected stock on ${thisThat} day"
   echo "How many units did you buy or sell on that date? (negative numbers to sell)"
   validUnitInput=0
   while [[ ${validUnitInput} != 1 ]]
@@ -204,6 +210,6 @@ while [[ ${allInputCorrect} != "1" ]]
 done
 
 lineToAdd="${dateToAdd},${stocks[${stockOrder[${stockToAdd}]}]},${unitsToTrade}"
-#echo ${lineToAdd} >> "${owned_stock_file}"
-echo ${lineToAdd}
+echo ${lineToAdd} >> "${owned_stock_file}"
+echo
 echo "Transaction added"
