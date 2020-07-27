@@ -72,7 +72,7 @@ while [[ ${allInputCorrect} != "1" ]]
   checkInput=0;
   while [[ ${checkInput} = "0" ]]
   do
-    echo "Which stock do you want to add?"
+    echo "Which stock do you want to trade?"
     read -p "(1 - ${#stockNames[@]}, q to quit): " stockToAdd
     if [[ ${stockToAdd} == "q" ]]; then
       exit 0;
@@ -149,8 +149,12 @@ while [[ ${allInputCorrect} != "1" ]]
       fi
     done < "${owned_stock_file}"
   fi
-
-  echo "The rate on" ${displayDate} "was" ${rateOnDate} "and you owned" ${totalOwned} "units of the selected stock on that day"
+  if [[ ${rateOnDate} == $(date +%Y.%m.%d) ]]; then
+    isWas="is"
+  else
+    isWas="was"
+  fi
+  echo "The rate on ${displayDate} ${isWas} ${rateOnDate} and you owned ${totalOwned} units of the selected stock on that day"
   echo "How many units did you buy or sell on that date? (negative numbers to sell)"
   validUnitInput=0
   while [[ ${validUnitInput} != 1 ]]
