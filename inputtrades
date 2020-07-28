@@ -27,7 +27,7 @@ fileroot="$( cd "$(dirname "$0")" || exit >/dev/null 2>&1 ; pwd -P )"
 
 # Working files
 stock_names_file="${fileroot}/data/naming/names"
-owned_stock_file="${fileroot}/data/user_data/owned"
+traded_stock_file="${fileroot}/data/user_data/trades"
 files=$(find "${fileroot}"/data/rates/*)
 
 # Prepare arrays
@@ -74,18 +74,18 @@ while [[ ${allInputCorrect} != "1" ]]
   while [[ ${checkInput} = "0" ]]
   do
     echo "Which stock do you want to trade?"
-    read -p "(1 - ${#stockNames[@]}, q to quit): " stockToAdd
-    if [[ ${stockToAdd} == "q" ]]; then
+    read -p "(1 - ${#stockNames[@]}, q to quit): " stockToTrade
+    if [[ ${stockToTrade} == "q" ]]; then
       exit 0;
     fi
-    if [[ ${stockToAdd} -lt 1 ]] || [[ ${stockToAdd} -gt ${#stockNames[@]} ]]; then
+    if [[ ${stockToTrade} -lt 1 ]] || [[ ${stockToTrade} -gt ${#stockNames[@]} ]]; then
       echo "Not a valid stock"
     else
       checkInput=1
     fi
   done
 
-  stockToAdd=$((stockToAdd-1))
+  stockToTrade=$((stockToTrade-1))
 
   echo
   while  [[ ${rateOnDate} == "" ]];
@@ -93,33 +93,33 @@ while [[ ${allInputCorrect} != "1" ]]
     tryCurrDate=0
     errCode=1
     echo "For which date do you want to trade stock? e.g. '2020.09.31'"
-    read -p "(leave blank for today, q to quit): " dateToAdd
+    read -p "(leave blank for today, q to quit): " dateToTrade
     while [[ ${errCode} != "0" ]]
     do
-      if [[ ${dateToAdd} == "q" ]]; then
+      if [[ ${dateToTrade} == "q" ]]; then
         exit 0;
       fi
-      if [[ ${dateToAdd} == "" ]]; then
-        dateToAdd=$(date +%Y.%m.%d)
+      if [[ ${dateToTrade} == "" ]]; then
+        dateToTrade=$(date +%Y.%m.%d)
         tryCurrDate=1
       fi
       # Check if input date is correct
-      date -d"${dateToAdd//./}" '+%A %B %d %Y' > /dev/null 2>&1
+      date -d"${dateToTrade//./}" '+%A %B %d %Y' > /dev/null 2>&1
       errCode=$?
       if [[ ${errCode} != '0' ]]; then
         echo "Invalid date"
       fi
     done
-    displayDate=$(date -d"${dateToAdd//./}" '+%A %B %d %Y')
-    if [[ -f "${filenames[${stockOrder[${stockToAdd}]}]}" ]]; then
+    displayDate=$(date -d"${dateToTrade//./}" '+%A %B %d %Y')
+    if [[ -f "${filenames[${stockOrder[${stockToTrade}]}]}" ]]; then
       while IFS="," read -r d rate
       do
-        if [[ ${d} == ${dateToAdd} ]]; then
+        if [[ ${d} == ${dateToTrade} ]]; then
           rateOnDate=${rate}
         fi
-      done < "${filenames[${stockOrder[${stockToAdd}]}]}"
+      done < "${filenames[${stockOrder[${stockToTrade}]}]}"
     else
-      echo "No rate data found for this stock (filename ${stocks[${stockOrder[${stockToAdd}]}]})"
+      echo "No rate data found for this stock (filename ${stocks[${stockOrder[${stockToTrade}]}]})"
       exit 1;
     fi
     if [[ ${rateOnDate} == "" ]]; then
@@ -136,22 +136,22 @@ while [[ ${allInputCorrect} != "1" ]]
       fi
     fi
   done
-  totalOwned=0
+  totalTraded=0
   isCurrentDate=0
-  if [[ -f "${owned_stock_file}" ]]; then
+  if [[ -f "${traded_stock_file}" ]]; then
     while IFS="," read -r d stock amt
     do
       if [[ ${isCurrentDate} == 0 ]]; then
-        if [[ ${stock} == ${stocks[${stockOrder[${stockToAdd}]}]} ]]; then
-          totalOwned=$(awk '{print $1+$2}' <<< "${totalOwned} ${amt}")
-          if [[ ${d} == ${dateToAdd} ]]; then
+        if [[ ${stock} == ${stocks[${stockOrder[${stockToTrade}]}]} ]]; then
+          totalTraded=$(awk '{print $1+$2}' <<< "${totalTraded} ${amt}")
+          if [[ ${d} == ${dateToTrade} ]]; then
             isCurrentDate=1
           fi
         fi
       fi
-    done < "${owned_stock_file}"
+    done < "${traded_stock_file}"
   fi
-  if [[ ${dateToAdd} == $(date +%Y.%m.%d) ]]; then
+  if [[ ${dateToTrade} == $(date +%Y.%m.%d) ]]; then
     isWas="is"
     ownOwned="own"
     thisThat="this"
@@ -161,14 +161,13 @@ while [[ ${allInputCorrect} != "1" ]]
     thisThat="that"
   fi
   echo
-  echo "The rate on ${displayDate} ${isWas} ${rateOnDate} and you ${ownOwned} ${totalOwned} units of the selected stock on ${thisThat} day"
+  echo "The rate on ${displayDate} ${isWas} ${rateOnDate} and you ${ownOwned} ${totalTraded} units of the selected stock on ${thisThat} day"
   echo "How many units did you buy or sell on that date? (negative numbers to sell)"
   validUnitInput=0
   while [[ ${validUnitInput} != 1 ]]
   do
     validUnitInput=1
     read -p "(a to sell all, q to quit): " unitsToTrade
-    maximumToSell=$(awk '{print $1*-1}' <<< "${totalOwned}")
 
     if [[ ${unitsToTrade} == "q" ]]; then
       exit 0;
@@ -184,9 +183,10 @@ while [[ ${allInputCorrect} != "1" ]]
        validUnitInput=0
     fi
 
+    maximumToSell=$(awk '{print $1*-1}' <<< "${totalTraded}")
     enoughToTrade=$(awk '{if ($1 >= $2) print 1}' <<< "${unitsToTrade} ${maximumToSell}")
     if [[ $enoughToTrade != "1" ]]; then
-      echo "Not enough units for trade"
+      echo "Not enough units owned for this trade amount"
       validUnitInput=0
     fi
   done
@@ -199,7 +199,7 @@ while [[ ${allInputCorrect} != "1" ]]
   fi
   tradeValue=$(awk '{print $1*$2}' <<< "${unitsToTrade} ${rateOnDate}")
   echo
-  echo "You have made a total ${buyOrSell} of ${unitsToTrade} units of ${stockNames[${stockOrder[${stockToAdd}]}]} worth ${tradeValue} on ${displayDate}" | fold -s
+  echo "You are creating a ${buyOrSell} of ${unitsToTrade} units of '${stockNames[${stockOrder[${stockToTrade}]}]}' worth ${tradeValue} on ${displayDate}" | fold -s
   echo "Is that correct?"
   read -p "(y/n, q to quit): " isCorrect
   if [[ ${isCorrect} == "q" ]]; then
@@ -210,7 +210,7 @@ while [[ ${allInputCorrect} != "1" ]]
   fi
 done
 
-lineToAdd="${dateToAdd},${stocks[${stockOrder[${stockToAdd}]}]},${unitsToTrade}"
-echo ${lineToAdd} >> "${owned_stock_file}"
+lineToAdd="${dateToTrade},${stocks[${stockOrder[${stockToTrade}]}]},${unitsToTrade}"
+echo ${lineToAdd} >> "${traded_stock_file}"
 echo
 echo "Transaction added"

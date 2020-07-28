@@ -135,20 +135,23 @@ else
   exit 1
 fi
 
-# Get owned stocks, dates & amounts Traded
+# Get traded stocks, dates & amounts Traded
 buyDates=()
 stocksTraded=()
 amountTraded=()
 tracked=()
-owned_stock_file="${fileroot}/data/user_data/owned"
-if [[ -f "${owned_stock_file}" ]]; then
+traded_stock_file="${fileroot}/data/user_data/trades"
+if [[ -f "${trades_stock_file}" ]]; then
   while IFS="," read -r d stock amt
   do
     buyDates+=(${d})
     stocksTraded+=(${stock})
     amountTraded+=(${amt})
     tracked+=("0")
-  done < "${owned_stock_file}"
+  done < "${trades_stock_file}"
+fi
+if [[ ${#buyDates[@]} == "0" ]]; then
+  echo "No traded stock data found"
 fi
 
 # Get last known rates
