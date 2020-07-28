@@ -60,157 +60,177 @@ else
   exit 1
 fi
 
-while [[ ${allInputCorrect} != "1" ]]
-  do
-  # List available stock
-  i=1
-  for stockIndex in ${stockOrder[@]}
-  do
-    echo ${i} ${stockNames[${stockIndex}]}
-    i=$((i+1))
-  done
-
-  checkInput=0;
-  while [[ ${checkInput} = "0" ]]
-  do
-    echo "Which stock do you want to trade?"
-    read -p "(1 - ${#stockNames[@]}, q to quit): " stockToTrade
-    if [[ ${stockToTrade} == "q" ]]; then
-      exit 0;
-    fi
-    if [[ ${stockToTrade} -lt 1 ]] || [[ ${stockToTrade} -gt ${#stockNames[@]} ]]; then
-      echo "Not a valid stock"
-    else
-      checkInput=1
-    fi
-  done
-
-  stockToTrade=$((stockToTrade-1))
-
-  echo
-  while  [[ ${rateOnDate} == "" ]];
-  do
-    tryCurrDate=0
-    errCode=1
-    echo "For which date do you want to trade stock? e.g. '2020.09.31'"
-    read -p "(leave blank for today, q to quit): " dateToTrade
-    while [[ ${errCode} != "0" ]]
+while [[ ${doneInputting} != "1" ]]
+do
+  allInputCorrect="0"
+  while [[ ${allInputCorrect} != "1" ]]
     do
-      if [[ ${dateToTrade} == "q" ]]; then
+    # List available stock
+    i=1
+    for stockIndex in ${stockOrder[@]}
+    do
+      echo ${i} ${stockNames[${stockIndex}]}
+      i=$((i+1))
+    done
+
+    checkInput=0;
+    while [[ ${checkInput} = "0" ]]
+    do
+      echo
+      echo "Which stock do you want to trade?"
+      read -p "(1 - ${#stockNames[@]}, q to quit): " stockToTrade
+      if [[ ${stockToTrade} == "q" ]]; then
         exit 0;
       fi
-      if [[ ${dateToTrade} == "" ]]; then
-        dateToTrade=$(date +%Y.%m.%d)
-        tryCurrDate=1
-      fi
-      # Check if input date is correct
-      date -d"${dateToTrade//./}" '+%A %B %d %Y' > /dev/null 2>&1
-      errCode=$?
-      if [[ ${errCode} != '0' ]]; then
-        echo "Invalid date"
+      if [[ ${stockToTrade} -lt 1 ]] || [[ ${stockToTrade} -gt ${#stockNames[@]} ]]; then
+        echo "Not a valid stock"
+      else
+        checkInput=1
       fi
     done
-    displayDate=$(date -d"${dateToTrade//./}" '+%A %B %d %Y')
-    if [[ -f "${filenames[${stockOrder[${stockToTrade}]}]}" ]]; then
-      while IFS="," read -r d rate
+
+    stockToTrade=$((stockToTrade-1))
+
+    echo
+    rateOnDate=""
+    while  [[ ${rateOnDate} == "" ]];
+    do
+      tryCurrDate=0
+      errCode=1
+      echo "For which date do you want to trade stock? e.g. '2020.09.31'"
+      read -p "(leave blank for today, q to quit): " dateToTrade
+      while [[ ${errCode} != "0" ]]
       do
-        if [[ ${d} == ${dateToTrade} ]]; then
-          rateOnDate=${rate}
-        fi
-      done < "${filenames[${stockOrder[${stockToTrade}]}]}"
-    else
-      echo "No rate data found for this stock (filename ${stocks[${stockOrder[${stockToTrade}]}]})"
-      exit 1;
-    fi
-    if [[ ${rateOnDate} == "" ]]; then
-      echo "No rate data for that date"
-      if [[ ${tryCurrDate} == "1" ]]; then
-        echo "You do not have today's stock data, do you want to run 'getrates'?"
-        read -p "(y/n, q to quit): " runGetRates
-        if [[ ${runGetRates} == "q" ]]; then
+        if [[ ${dateToTrade} == "q" ]]; then
           exit 0;
         fi
-        if [[ ${runGetRates} == "y" ]]; then
-          $(/bin/bash "${fileroot}/getrates")
+        if [[ ${dateToTrade} == "" ]]; then
+          dateToTrade=$(date +%Y.%m.%d)
+          tryCurrDate=1
         fi
-      fi
-    fi
-  done
-  totalTraded=0
-  isCurrentDate=0
-  if [[ -f "${traded_stock_file}" ]]; then
-    while IFS="," read -r d stock amt
-    do
-      if [[ ${isCurrentDate} == 0 ]]; then
-        if [[ ${stock} == ${stocks[${stockOrder[${stockToTrade}]}]} ]]; then
-          totalTraded=$(awk '{print $1+$2}' <<< "${totalTraded} ${amt}")
+        # Check if input date is correct
+        date -d"${dateToTrade//./}" '+%A %B %d %Y' > /dev/null 2>&1
+        errCode=$?
+        if [[ ${errCode} != '0' ]]; then
+          echo "Invalid date"
+        fi
+      done
+      displayDate=$(date -d"${dateToTrade//./}" '+%A %B %d %Y')
+      if [[ -f "${filenames[${stockOrder[${stockToTrade}]}]}" ]]; then
+        while IFS="," read -r d rate
+        do
           if [[ ${d} == ${dateToTrade} ]]; then
-            isCurrentDate=1
+            rateOnDate=${rate}
+          fi
+        done < "${filenames[${stockOrder[${stockToTrade}]}]}"
+      else
+        echo "No rate data found for this stock (filename ${stocks[${stockOrder[${stockToTrade}]}]})"
+        exit 1;
+      fi
+      if [[ ${rateOnDate} == "" ]]; then
+        echo "No rate data for that date"
+        if [[ ${tryCurrDate} == "1" ]]; then
+          echo "You do not have today's stock data, do you want to run 'getrates'?"
+          read -p "(y/n, q to quit): " runGetRates
+          if [[ ${runGetRates} == "q" ]]; then
+            exit 0;
+          fi
+          if [[ ${runGetRates} == "y" ]]; then
+            $(/bin/bash "${fileroot}/getrates")
           fi
         fi
       fi
-    done < "${traded_stock_file}"
-  fi
-  if [[ ${dateToTrade} == $(date +%Y.%m.%d) ]]; then
-    isWas="is"
-    ownOwned="own"
-    thisThat="this"
-  else
-    isWas="was"
-    ownOwned="owned"
-    thisThat="that"
-  fi
-  echo
-  echo "The rate on ${displayDate} ${isWas} ${rateOnDate} and you ${ownOwned} ${totalTraded} units of the selected stock on ${thisThat} day"
-  echo "How many units did you buy or sell on that date? (negative numbers to sell)"
-  validUnitInput=0
-  while [[ ${validUnitInput} != 1 ]]
-  do
-    validUnitInput=1
-    read -p "(a to sell all, q to quit): " unitsToTrade
+    done
+    totalTraded=0
+    isCurrentDate=0
+    if [[ -f "${traded_stock_file}" ]]; then
+      while IFS="," read -r d stock amt
+      do
+        if [[ ${isCurrentDate} == 0 ]]; then
+          if [[ ${stock} == ${stocks[${stockOrder[${stockToTrade}]}]} ]]; then
+            totalTraded=$(awk '{print $1+$2}' <<< "${totalTraded} ${amt}")
+            if [[ ${d} == ${dateToTrade} ]]; then
+              isCurrentDate=1
+            fi
+          fi
+        fi
+      done < "${traded_stock_file}"
+    fi
+    if [[ ${dateToTrade} == $(date +%Y.%m.%d) ]]; then
+      isWas="is"
+      ownOwned="own"
+      thisThat="this"
+    else
+      isWas="was"
+      ownOwned="owned"
+      thisThat="that"
+    fi
+    echo
+    echo "The rate on ${displayDate} ${isWas} ${rateOnDate} and you ${ownOwned} ${totalTraded} units of the selected stock on ${thisThat} day"
+    echo "How many units did you buy or sell on that date? (negative numbers to sell)"
+    validUnitInput=0
+    while [[ ${validUnitInput} != 1 ]]
+    do
+      validUnitInput=1
+      maximumToSell=$(awk '{print $1*-1}' <<< "${totalTraded}")
 
-    if [[ ${unitsToTrade} == "q" ]]; then
+      read -p "(a to sell all, q to quit): " unitsToTrade
+
+      if [[ ${unitsToTrade} == "q" ]]; then
+        exit 0;
+      fi
+      if [[ ${unitsToTrade} == "a" ]]; then
+        unitsToTrade=${maximumToSell}
+      fi
+
+      if [[ ${unitsToTrade} == "0" ]]; then
+        echo "You cannot trade 0 units"
+        validUnitInput=0
+      fi
+
+      unitsToTrade=${unitsToTrade/,/.}
+      regex='^[+-]?[0-9]+([.][0-9]+)?$'
+      if ! [[ ${unitsToTrade} =~ ${regex} ]] ; then
+         echo "Not a number"
+         validUnitInput=0
+      fi
+
+      enoughToTrade=$(awk '{if ($1 >= $2) print 1}' <<< "${unitsToTrade} ${maximumToSell}")
+      if [[ $enoughToTrade != "1" ]]; then
+        echo "Not enough units owned for this trade amount"
+        validUnitInput=0
+      fi
+    done
+
+    isBuyOrSell=$(awk '{if ($1 >= 0) print 1}' <<< "${unitsToTrade}")
+    if [[ ${isBuyOrSell} == "1" ]]; then
+      buyOrSell="purchase"
+    else
+      buyOrSell="sale"
+    fi
+    tradeValue=$(awk '{print $1*$2}' <<< "${unitsToTrade} ${rateOnDate}")
+    echo
+    echo "You are creating a ${buyOrSell} of ${unitsToTrade} units of '${stockNames[${stockOrder[${stockToTrade}]}]}' worth ${tradeValue} on ${displayDate}" | fold -s
+    echo "Is that correct?"
+    read -p "(y/n, q to quit): " isCorrect
+    if [[ ${isCorrect} == "q" ]]; then
       exit 0;
     fi
-    if [[ ${unitsToTrade} == "a" ]]; then
-      unitsToTrade=${maximumToSell}
-    fi
-
-    unitsToTrade=${unitsToTrade/,/.}
-    regex='^[+-]?[0-9]+([.][0-9]+)?$'
-    if ! [[ ${unitsToTrade} =~ ${regex} ]] ; then
-       echo "Not a number"
-       validUnitInput=0
-    fi
-
-    maximumToSell=$(awk '{print $1*-1}' <<< "${totalTraded}")
-    enoughToTrade=$(awk '{if ($1 >= $2) print 1}' <<< "${unitsToTrade} ${maximumToSell}")
-    if [[ $enoughToTrade != "1" ]]; then
-      echo "Not enough units owned for this trade amount"
-      validUnitInput=0
+    if [[ ${isCorrect} == "y" ]]; then
+      allInputCorrect="1"
     fi
   done
 
-  isBuyOrSale==$(awk '{if ($1 >= 0) print 1}' <<< "${unitsToTrade}")
-  if [[ ${isBuyOrSale} == "1" ]]; then
-    buyOrSell="purchase"
-  else
-    buyOrSell="sale"
-  fi
-  tradeValue=$(awk '{print $1*$2}' <<< "${unitsToTrade} ${rateOnDate}")
-  echo
-  echo "You are creating a ${buyOrSell} of ${unitsToTrade} units of '${stockNames[${stockOrder[${stockToTrade}]}]}' worth ${tradeValue} on ${displayDate}" | fold -s
-  echo "Is that correct?"
-  read -p "(y/n, q to quit): " isCorrect
-  if [[ ${isCorrect} == "q" ]]; then
-    exit 0;
-  fi
-  if [[ ${isCorrect} == "y" ]]; then
-    allInputCorrect="1"
-  fi
-done
+  lineToAdd="${dateToTrade},${stocks[${stockOrder[${stockToTrade}]}]},${unitsToTrade}"
+  #echo ${lineToAdd} >> "${traded_stock_file}"
 
-lineToAdd="${dateToTrade},${stocks[${stockOrder[${stockToTrade}]}]},${unitsToTrade}"
-echo ${lineToAdd} >> "${traded_stock_file}"
-echo
-echo "Transaction added"
+  echo
+  echo "Transaction added"
+  echo
+  echo "Do you wish to input another transaction?"
+  read -p "(y/n, q to quit): " doneInputting
+  if [[ ${doneInputting} != "y" ]]; then
+    doneInputting="1"
+  fi
+  echo
+done
