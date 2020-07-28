@@ -119,7 +119,7 @@ while [[ ${allInputCorrect} != "1" ]]
         fi
       done < "${filenames[${stockOrder[${stockToAdd}]}]}"
     else
-      echo "No rate data found for this stock"
+      echo "No rate data found for this stock (filename ${stocks[${stockOrder[${stockToAdd}]}]})"
       exit 1;
     fi
     if [[ ${rateOnDate} == "" ]]; then
