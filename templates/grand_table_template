@@ -13,10 +13,10 @@
             <td>Total difference %</td>
         </tr>
         <tr>
-            <td>${grandTotalPurchase}</td>
-            <td>${grandTotalCurrValue}</td>
-            <td>${grandTotalValueDiff}</td>
-            <td>${grandTotalValueDiffPercent}</td>
+            <td>${grandTotalPurchaseFormatted}</td>
+            <td>${grandTotalCurrValueFormatted}</td>
+            <td>${grandTotalValueDiffFormatted}</td>
+            <td>${grandTotalValueDiffPercentFormatted}</td>
         </tr>
     </tbody>
 </table>

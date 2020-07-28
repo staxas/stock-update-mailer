@@ -97,11 +97,16 @@ filenames=()
 stocks=()
 totalAmountTraded=()
 totalPurchase=()
+totalPurchaseFormatted=()
 nrOfEntries=()
 averageRate=()
+averageRateFormatted=()
 rateDiffPercent=()
+rateDiffPercentFormatted=()
 totalPurchaseCurrValue=()
+totalPurchaseCurrValueFormatted=()
 totalPurchaseDiff=()
+totalPurchaseDiffFormatted=()
 stockNames=()
 stockOrder=()
 for fname in ${files}
@@ -110,11 +115,16 @@ do
   stocks+=($(basename "${fname}"))
   totalAmountTraded+=("0")
   totalPurchase+=("0")
+  totalPurchaseFormatted+=("0")
   nrOfEntries+=("0")
   averageRate+=("0")
+  averageRateFormatted+=("0")
   rateDiffPercent+=("0")
+  rateDiffPercentFormatted+=("0")
   totalPurchaseCurrValue+=("0")
+  totalPurchaseCurrValueFormatted+=("0")
   totalPurchaseDiff+=("0")
+  totalPurchaseDiffFormatted+=("0")
   stockNames+=("")
   stockOrder+=("")
 done
@@ -140,7 +150,7 @@ buyDates=()
 stocksTraded=()
 amountTraded=()
 tracked=()
-traded_stock_file="${fileroot}/data/user_data/trades"
+trades_stock_file="${fileroot}/data/user_data/trades"
 if [[ -f "${trades_stock_file}" ]]; then
   while IFS="," read -r d stock amt
   do
@@ -158,11 +168,12 @@ fi
 lastRate=()
 for fname in ${filenames[@]}
 do
+  lastRateFormatted+=(0)
   if [[ -f "${fname}" ]]; then
     readarray -d "," -t strarr <<< $(tail -1 "${fname}")
     lastRate+=($(echo "${strarr[1]}" | tr -d '\n'))
   else
-    lastRate+=(0);
+    lastRate+=(0)
   fi
 done
 
@@ -257,32 +268,32 @@ do
   fi
 
   # Setting three decimal points for percentage fields
-  rateDiffPercent[i]=$(printf "%0.3f\n" ${rateDiffPercent[i]/./${locDec}})
-  rateDiffPercent[i]=${rateDiffPercent[i]/${locDec}/.}
+  rateDiffPercentFormatted[i]=$(printf "%0.3f\n" ${rateDiffPercent[i]/./${locDec}})
+  rateDiffPercentFormatted[i]=${rateDiffPercentFormatted[i]/${locDec}/.}
 
   # Setting two decimal points for currency fields
-  totalPurchase[i]=$(printf "%0.2f\n" ${totalPurchase[i]/./${locDec}})
-  totalPurchaseCurrValue[i]=$(printf "%0.2f\n"  ${totalPurchaseCurrValue[i]/./${locDec}})
-  totalPurchaseDiff[i]=$(printf "%0.2f\n"  ${totalPurchaseDiff[i]/./${locDec}})
-  averageRate[i]=$(printf "%0.2f\n" ${averageRate[i]/./${locDec}})
-  lastRate[i]=$(printf "%0.2f\n" ${lastRate[i]/./${locDec}})
+  totalPurchaseFormatted[i]=$(printf "%0.2f\n" ${totalPurchase[i]/./${locDec}})
+  totalPurchaseCurrValueFormatted[i]=$(printf "%0.2f\n"  ${totalPurchaseCurrValue[i]/./${locDec}})
+  totalPurchaseDiffFormatted[i]=$(printf "%0.2f\n"  ${totalPurchaseDiff[i]/./${locDec}})
+  averageRateFormatted[i]=$(printf "%0.2f\n" ${averageRate[i]/./${locDec}})
+  lastRateFormatted[i]=$(printf "%0.2f\n" ${lastRate[i]/./${locDec}})
 
   # Changing currency separator
   if [[ $separator != "" ]]; then
-    totalPurchase[i]=${totalPurchase[i]/${locDec}/${separator}}
-    totalPurchaseCurrValue[i]=${totalPurchaseCurrValue[i]/${locDec}/${separator}}
-    totalPurchaseDiff[i]=${totalPurchaseDiff[i]/${locDec}/${separator}}
-    averageRate[i]=${averageRate[i]/${locDec}/${separator}}
-    lastRate[i]=${lastRate[i]/${locDec}/${separator}}
+    totalPurchaseFormatted[i]=${totalPurchaseFormatted[i]/${locDec}/${separator}}
+    totalPurchaseCurrValueFormatted[i]=${totalPurchaseCurrValueFormatted[i]/${locDec}/${separator}}
+    totalPurchaseDiffFormatted[i]=${totalPurchaseDiffFormatted[i]/${locDec}/${separator}}
+    averageRateFormatted[i]=${averageRateFormatted[i]/${locDec}/${separator}}
+    lastRateFormatted[i]=${lastRateFormatted[i]/${locDec}/${separator}}
   fi
 
   # Adding currency sign
   if [[ $currency != "" ]]; then
-    totalPurchase[i]="${currency} ${totalPurchase[i]}"
-    totalPurchaseCurrValue[i]="${currency} ${totalPurchaseCurrValue[i]}"
-    totalPurchaseDiff[i]="${currency} ${totalPurchaseDiff[i]}"
-    averageRate[i]="${currency} ${averageRate[i]}"
-    lastRate[i]="${currency} ${lastRate[i]}"
+    totalPurchaseFormatted[i]="${currency} ${totalPurchaseFormatted[i]}"
+    totalPurchaseCurrValueFormatted[i]="${currency} ${totalPurchaseCurrValueFormatted[i]}"
+    totalPurchaseDiffFormatted[i]="${currency} ${totalPurchaseDiffFormatted[i]}"
+    averageRateFormatted[i]="${currency} ${averageRateFormatted[i]}"
+    lastRateFormatted[i]="${currency} ${lastRateFormatted[i]}"
   fi
 
   # Adding individual stock tables to email
@@ -298,26 +309,26 @@ if [[ ${grandTotalValueDiff} != "0" ]] && [[ ${grandTotalPurchase} != "0" ]]; th
 fi
 
 # Setting three decimal points for percentage fields
-grandTotalValueDiffPercent=$(printf "%0.3f\n" ${grandTotalValueDiffPercent/./${locDec}})
-grandTotalValueDiffPercent=${grandTotalValueDiffPercent/${locDec}/.}
+grandTotalValueDiffPercentFormatted=$(printf "%0.3f\n" ${grandTotalValueDiffPercent/./${locDec}})
+grandTotalValueDiffPercentFormatted=${grandTotalValueDiffPercentFormatted/${locDec}/.}
 
 # Setting two decimal points for currency fields
-grandTotalPurchase=$(printf "%0.2f\n" ${grandTotalPurchase/./${locDec}})
-grandTotalCurrValue=$(printf "%0.2f\n" ${grandTotalCurrValue/./${locDec}})
-grandTotalValueDiff=$(printf "%0.2f\n" ${grandTotalValueDiff/./${locDec}})
+grandTotalPurchaseFormatted=$(printf "%0.2f\n" ${grandTotalPurchase/./${locDec}})
+grandTotalCurrValueFormatted=$(printf "%0.2f\n" ${grandTotalCurrValue/./${locDec}})
+grandTotalValueDiffFormatted=$(printf "%0.2f\n" ${grandTotalValueDiff/./${locDec}})
 
 # Changing currency separator
 if [[ $separator != "" ]]; then
-  grandTotalPurchase=${grandTotalPurchase/${locDec}/${separator}}
-  grandTotalCurrValue=${grandTotalCurrValue/${locDec}/${separator}}
-  grandTotalValueDiff=${grandTotalValueDiff/${locDec}/${separator}}
+  grandTotalPurchaseFormatted=${grandTotalPurchaseFormatted/${locDec}/${separator}}
+  grandTotalCurrValueFormatted=${grandTotalCurrValueFormatted/${locDec}/${separator}}
+  grandTotalValueDiffFormatted=${grandTotalValueDiffFormatted/${locDec}/${separator}}
 fi
 
 # Adding currency sign
 if [[ $currency != "" ]]; then
-  grandTotalPurchase="${currency} ${grandTotalPurchase}"
-  grandTotalCurrValue="${currency} ${grandTotalCurrValue}"
-  grandTotalValueDiff="${currency} ${grandTotalValueDiff}"
+  grandTotalPurchaseFormatted="${currency} ${grandTotalPurchaseFormatted}"
+  grandTotalCurrValueFormatted="${currency} ${grandTotalCurrValueFormatted}"
+  grandTotalValueDiffFormatted="${currency} ${grandTotalValueDiffFormatted}"
 fi
 
 # Adding grand total table to email
