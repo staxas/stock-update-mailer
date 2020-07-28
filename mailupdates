@@ -130,6 +130,9 @@ if [[ -f ${stock_names_file} ]]; then
       stockOrder[${order}]=${pos}
     fi
   done < "${stock_names_file}"
+else
+  echo "${stock_names_file} does not exist"
+  exit 1
 fi
 
 # Get owned stocks, dates & amounts Traded
