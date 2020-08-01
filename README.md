@@ -29,7 +29,7 @@ of graphs in the 'mailupdates' script (see the 'plotGraph' function in 'mailupda
 The section for the adding of ratio tables in 'mailupdate' (mailupdate -r y) is an example for tracking portfolios where ratios
 of for example stocks and bonds is important. The calculations in this section are examples only, and if needed, will have to be
 adapted manually. A sample for the ratio table has been added for measuring stock/bond ratio (a 60/40 stock bond portfolio is a
-well-known strategy for long-term retirement investment).
+well-known strategy for long-term retirement investing).
 
 Requires ssmtp to be installed and configured correctly
 
