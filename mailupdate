@@ -446,7 +446,11 @@ if [[ ${sendGraphs} == "y" ]] && ! [[ -f ${log_file} ]]; then
   echo "Can't plot graphs without log file!"
 fi
 
-if [[ ${sendGraphs} == "y" ]] && [[ -f ${log_file} ]]; then
+if [[ ${sendGraphs} == "y" ]] && ! [[ -s ${log_file} ]] && ; then
+  echo "Can't plot graphs with empty log file!"
+fi
+
+if [[ ${sendGraphs} == "y" ]] && [[ -s ${log_file} ]]; then
   echo "Creating graphs email..."
 
   graphs_subject="Grafieken"
