@@ -5,7 +5,7 @@
 # By Edwin Rietmeijer, 2020
 
 if [[ ${1} == "" ]]; then
-  echo "Usage: ${0} <email-addr> [-c <symbol>] [-d <symbol>] [-e <email-addr>] [-s <subject>] [-r <y/n>] [-g <y/n>] [-l <y/n>]"
+  echo "Usage: $(basename ${0}) <email-addr> [-c <symbol>] [-d <symbol>] [-e <email-addr>] [-s <subject>] [-r <y/n>] [-g <y/n>] [-l <y/n>]"
   echo ""
   echo "Currency symbol (-c) is blank by default"
   echo "Decimal separator symbol (-d) is ',' by default"
@@ -13,7 +13,7 @@ if [[ ${1} == "" ]]; then
   echo "Email subject (-s) is 'Stock update' by default"
   echo "Logging (-l) is off by default"
   echo "Graph email (-g) is off by default"
-  echo "Ratio tablel (-r) is off by default"
+  echo "Ratio table (-r) is off by default"
   echo "Sending graph email requires log file with data"
   exit 0
 fi
