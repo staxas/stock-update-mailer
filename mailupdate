@@ -252,6 +252,15 @@ do
   fi
 done
 
+i=0
+for isTracked in ${tracked[@]}
+do
+  if [[ ${isTracked} != "1" ]]; then
+    echo "No rates found for trade of ${amountTraded[i]} of ${stocksTraded[i]} on ${buyDates[i]}"
+  fi
+  i=$((i+1))
+done
+
 # Preparing to render email message
 echo "Creating update email..."
 if [[ -f "${email_file}" ]]; then
