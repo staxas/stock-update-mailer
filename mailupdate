@@ -442,7 +442,11 @@ echo "Sending update email..."
 /usr/sbin/ssmtp "${email_address}" < "${email_file}"
 
 # Send graphs email
-if [[ ${sendGraphs} == "y" ]]; then
+if [[ ${sendGraphs} == "y" ]] && ! [[ -f ${log_file} ]]; then
+  echo "Can't plot graphs without log file!"
+fi
+
+if [[ ${sendGraphs} == "y" ]] && [[ -f ${log_file} ]]; then
   echo "Creating graphs email..."
 
   graphs_subject="Grafieken"
