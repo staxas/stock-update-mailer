@@ -442,18 +442,18 @@ echo "Sending update email..."
 /usr/sbin/ssmtp "${email_address}" < "${email_file}"
 
 # Send graphs email
-if [[ ${sendGraphs} == "y" ]] && ! [[ -f ${log_file} ]]; then
+if [[ ${sendGraphs} == "y" ]] && ! [[ -f "${log_file}" ]]; then
   echo "Can't plot graphs without log file!"
 fi
 
-if [[ ${sendGraphs} == "y" ]] && ! [[ -s ${log_file} ]] && ; then
+if [[ ${sendGraphs} == "y" ]] && [[ -f "${log_file}" ]] && ! [[ -s "${log_file}" ]]; then
   echo "Can't plot graphs with empty log file!"
 fi
 
-if [[ ${sendGraphs} == "y" ]] && [[ -s ${log_file} ]]; then
+if [[ ${sendGraphs} == "y" ]] && [[ -s "${log_file}" ]]; then
   echo "Creating graphs email..."
 
-  graphs_subject="Grafieken"
+  graphs_subject="Graphs"
 
   d=$(date +%Y.%m.%d)
   startDate=$(cat "${log_file}" | grep date | head -1 | awk '{print $2}')
@@ -481,9 +481,16 @@ fi
 # Clean up temporary files
 echo "Cleaning up..."
 
-rm "${email_file}"
-if [[ ${sendGraphs} == "y" ]]; then
-  rm "${graph_data_file}"
-  rm "${parsed_script_file}"
-  rm "${fileroot}"/*.png
+if [[ -f "${email_file}" ]]; then
+  rm "${email_file}"
 fi
+if [[ -f "${graph_data_file}" ]]; then
+  rm "${graph_data_file}"
+fi
+if [[ -f "${parsed_script_file}" ]]; then
+  rm "${parsed_script_file}"
+fi
+for f in "${fileroot}"/*.png; do
+    [ -e "$f" ] && rm "${fileroot}"/*.png
+    break
+done
