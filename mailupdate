@@ -453,7 +453,7 @@ fi
 if [[ ${sendGraphs} == "y" ]] && [[ -s "${log_file}" ]]; then
   echo "Creating graphs email..."
 
-  graphs_subject="Graphs"
+  graphs_subject="Grafieken"
 
   d=$(date +%Y.%m.%d)
   startDate=$(cat "${log_file}" | grep date | head -1 | awk '{print $2}')
@@ -478,6 +478,7 @@ if [[ ${sendGraphs} == "y" ]] && [[ -s "${log_file}" ]]; then
   graphs=$(find "${fileroot}"/*.png)
   echo -e "subject:${graphs_subject}\n"| (cat - && (for g in $graphs ; do uuencode "$g" $(basename "$g") ; done )  ) | /usr/sbin/ssmtp "${email_address}"
 fi
+
 # Clean up temporary files
 echo "Cleaning up..."
 
