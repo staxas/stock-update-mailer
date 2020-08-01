@@ -10,7 +10,7 @@
             <td>Total cost</td>
             <td>Total value</td>
             <td>Total gain/loss</td>
-            <td>Total difference %</td>
+            <td>Total difference</td>
         </tr>
         <tr>
             <td>${grandTotalPurchaseFormatted}</td>

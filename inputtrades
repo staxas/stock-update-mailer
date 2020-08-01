@@ -97,7 +97,7 @@ do
     do
       tryCurrDate=0
       errCode=1
-      echo "For which date do you want to trade stock? e.g. '2020.09.31'"
+      echo "For which date do you want to trade stock? e.g. '2020.12.31'"
       read -p "(leave blank for today, q to quit): " dateToTrade
       while [[ ${errCode} != "0" ]]
       do

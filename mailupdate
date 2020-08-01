@@ -1,17 +1,20 @@
 #!/bin/bash
 
 # Stock-Update-Mailer
-# MailRates v0.1
+# MailUpdate v0.1
 # By Edwin Rietmeijer, 2020
 
 if [[ ${1} == "" ]]; then
-  echo "Usage: ${0} <email-addr> [-c <symbol>] [-d <symbol>] [-e <email-addr>] [-s <subject>] [-l <on/off>]"
+  echo "Usage: ${0} <email-addr> [-c <symbol>] [-d <symbol>] [-e <email-addr>] [-s <subject>] [-r <y/n>] [-g <y/n>] [-l <y/n>]"
   echo ""
   echo "Currency symbol (-c) is blank by default"
   echo "Decimal separator symbol (-d) is ',' by default"
   echo "Sender email address (-e) is <email-address> by default"
   echo "Email subject (-s) is 'Stock update' by default"
   echo "Logging (-l) is off by default"
+  echo "Graph email (-g) is off by default"
+  echo "Ratio tablel (-r) is off by default"
+  echo "Sending graph email requires log file with data"
   exit 0
 fi
 
@@ -24,10 +27,26 @@ email_subject="Stock update"
 while getopts ":l:c:d:e:s:" opt; do
    case ${opt} in
      l )
-       if [[ $OPTARG == "on" ]] || [[ $OPTARG == "off" ]]; then
+       if [[ $OPTARG == "y" ]] || [[ $OPTARG == "n" ]]; then
          logging=$OPTARG
        else
-         echo "Invalid Option: -$OPTARG , logging can only be 'on' or 'off'" 1>&2
+         echo "Invalid Option: -$OPTARG , logging setting can only be 'y' or 'n'" 1>&2
+         exit 1
+       fi
+       ;;
+     g )
+       if [[ $OPTARG == "y" ]] || [[ $OPTARG == "n" ]]; then
+         sendGraphs=$OPTARG
+       else
+         echo "Invalid Option: -$OPTARG , graph email setting can only be 'y' or 'n'" 1>&2
+         exit 1
+       fi
+       ;;
+     r )
+       if [[ $OPTARG == "y" ]] || [[ $OPTARG == "n" ]]; then
+         renderRatios=$OPTARG
+       else
+         echo "Invalid Option: -$OPTARG , ratio table setting can only be 'y' or 'n'" 1>&2
          exit 1
        fi
        ;;
@@ -82,8 +101,21 @@ getPoss() {
   echo ${p[@]}
 }
 
-# Project working directory
+# Project working directory and files
 fileroot="$( cd "$(dirname "$0")" || exit >/dev/null 2>&1 ; pwd -P )"
+log_file="${fileroot}/logs/mailupdate.log"
+stock_names_file="${fileroot}/data/naming/names"
+trades_stock_file="${fileroot}/data/user_data/trades"
+email_file="${fileroot}/email.html"
+
+table_template_file="${fileroot}/templates/table_template"
+grand_table_template_file="${fileroot}/templates/grand_table_template"
+ratio_table_template_file="${fileroot}/templates/ratio_table_template"
+header_template_file="${fileroot}/templates/header_template"
+footer_template_file="${fileroot}/templates/footer_template"
+
+parsed_script_file="${fileroot}/parsedscript.p"
+graph_data_file="${fileroot}/graph.dat"
 
 # Prepare grand total variables
 grandTotalPurchase=0
@@ -130,7 +162,6 @@ do
 done
 
 # Get stock names
-stock_names_file="${fileroot}/data/naming/names"
 if [[ -f ${stock_names_file} ]]; then
   while IFS="," read -r stk order name
   do
@@ -150,7 +181,6 @@ buyDates=()
 stocksTraded=()
 amountTraded=()
 tracked=()
-trades_stock_file="${fileroot}/data/user_data/trades"
 if [[ -f "${trades_stock_file}" ]]; then
   while IFS="," read -r d stock amt
   do
@@ -178,6 +208,7 @@ do
 done
 
 # Loop through all known stocks
+echo "Getting stock data..."
 for stock in ${stocks[@]}
 do
   # Try to get the position of the current stock being checked
@@ -223,7 +254,7 @@ do
 done
 
 # Preparing to render email message
-email_file="${fileroot}/email.html"
+echo "Creating update email..."
 if [[ -f "${email_file}" ]]; then
   rm "${email_file}"
 fi
@@ -237,11 +268,6 @@ echo "MIME-Version: 1.0";
 echo "";
 echo "$(cat ${email_file})";
 ) >> "${email_file}"
-
-table_template_file="${fileroot}/templates/table_template"
-grand_table_template_file="${fileroot}/templates/grand_table_template"
-header_template_file="${fileroot}/templates/header_template"
-footer_template_file="${fileroot}/templates/footer_template"
 
 # Add email header
 if [[ -f ${header_template_file} ]]; then
@@ -269,7 +295,7 @@ do
 
   # Setting three decimal points for percentage fields
   rateDiffPercentFormatted[i]=$(printf "%0.3f\n" ${rateDiffPercent[i]/./${locDec}})
-  rateDiffPercentFormatted[i]=${rateDiffPercentFormatted[i]/${locDec}/.}
+  rateDiffPercentFormatted[i]=${rateDiffPercentFormatted[i]/${locDec}/.}" %"
 
   # Setting two decimal points for currency fields
   totalPurchaseFormatted[i]=$(printf "%0.2f\n" ${totalPurchase[i]/./${locDec}})
@@ -298,7 +324,9 @@ do
 
   # Adding individual stock tables to email
   if [[ -f ${table_template_file} ]]; then
-    echo $(eval "echo \"$(cat ${table_template_file})\"") >> "${email_file}"
+    table_template=$(cat "${table_template_file}")
+    parsed_file=$(eval "echo \"${table_template}\"")
+    echo "${parsed_file}" >> "${email_file}"
   fi
 done
 
@@ -310,7 +338,7 @@ fi
 
 # Setting three decimal points for percentage fields
 grandTotalValueDiffPercentFormatted=$(printf "%0.3f\n" ${grandTotalValueDiffPercent/./${locDec}})
-grandTotalValueDiffPercentFormatted=${grandTotalValueDiffPercentFormatted/${locDec}/.}
+grandTotalValueDiffPercentFormatted=${grandTotalValueDiffPercentFormatted/${locDec}/.}" %"
 
 # Setting two decimal points for currency fields
 grandTotalPurchaseFormatted=$(printf "%0.2f\n" ${grandTotalPurchase/./${locDec}})
@@ -333,7 +361,49 @@ fi
 
 # Adding grand total table to email
 if [[ -f ${grand_table_template_file} ]]; then
-  echo $(eval "echo \"$(cat ${grand_table_template_file})\"") >> "${email_file}"
+  grand_table_template=$(cat "${grand_table_template_file}")
+  parsed_file=$(eval "echo \"${grand_table_template}\"")
+  echo "${parsed_file}" >> "${email_file}"
+fi
+
+# Calculation percentages of amount of stock owned and add ratio table to email
+if [[ ${renderRatios} == "y" ]]; then
+  sefPos=$(getPos "NL0012125736" ${stocks[@]})
+  emMrkPos=$(getPos "NL0006311771" ${stocks[@]})
+  itPos=$(getPos "NL0006311821" ${stocks[@]})
+  glObPos=$(getPos "NL0006311839" ${stocks[@]})
+  sefVal=${totalPurchaseCurrValue[${sefPos}]}
+  emMrkVal=${totalPurchaseCurrValue[${emMrkPos}]}
+  itVal=${totalPurchaseCurrValue[${itPos}]}
+  glObVal=${totalPurchaseCurrValue[${glObPos}]}
+
+  sefTotal=$(awk '{print ($1+$2)}' <<< "${sefVal} ${emMrkVal}")
+
+  stockTotal=$(awk '{print ($1+$2+$3)}' <<< "${sefVal} ${emMrkVal} ${itVal}")
+
+  sefPercent=$(awk '{print (($1/$2)*100)}' <<< "${sefVal} ${sefTotal}")
+  emMrkPercent=$(awk '{print (($1/$2)*100)}' <<< "${emMrkVal} ${sefTotal}")
+  itPercent=$(awk '{print (($1/$2)*100)}' <<< "${itVal} ${stockTotal}")
+  stockPercent=$(awk '{print (($1/$2)*100)}' <<< "${stockTotal} ${grandTotalCurrValue}")
+  bondsPercent=$(awk '{print (($1/$2)*100)}' <<< "${glObVal} ${grandTotalCurrValue}")
+
+  sefPercentFormatted=$(printf "%0.1f\n" ${sefPercent/./${locDec}})
+  emMrkPercentFormatted=$(printf "%0.1f\n" ${emMrkPercent/./${locDec}})
+  itPercentFormatted=$(printf "%0.1f\n" ${itPercent/./${locDec}})
+  stockPercentFormatted=$(printf "%0.1f\n" ${stockPercent/./${locDec}})
+  bondsPercentFormatted=$(printf "%0.1f\n" ${bondsPercent/./${locDec}})
+
+  sefPercentFormatted=${sefPercentFormatted/${locDec}/.}" %"
+  emMrkPercentFormatted=${emMrkPercentFormatted/${locDec}/.}" %"
+  itPercentFormatted=${itPercentFormatted/${locDec}/.}" %"
+  stockPercentFormatted=${stockPercentFormatted/${locDec}/.}" %"
+  bondsPercentFormatted=${bondsPercentFormatted/${locDec}/.}" %"
+
+  if [[ -f ${ratio_table_template_file} ]]; then
+    ratio_table_template=$(cat "${ratio_table_template_file}")
+    parsed_file=$(eval "echo \"${ratio_table_template}\"")
+    echo "${parsed_file}" >> "${email_file}"
+  fi
 fi
 
 # Finishing up email rendering
@@ -342,10 +412,10 @@ if [[ -f ${footer_template_file} ]]; then
 fi
 
 # Log values
-if [[ ${logging} == "on" ]]; then
+if [[ ${logging} == "y" ]]; then
   echo "Logging..."
-  if [[ ! -d "${fileroot}/logs" ]]; then
-    mkdir "${fileroot}/logs"
+  if [[ ! -d "$(dirname ${log_file})" ]]; then
+    mkdir "$(dirname ${log_file})"
   fi
   (
   echo "---"
@@ -364,14 +434,49 @@ if [[ ${logging} == "on" ]]; then
   echo "grandTotalCurrValue ${grandTotalCurrValue}"
   echo "grandTotalValueDiff ${grandTotalValueDiff}"
   echo "grandTotalValueDiffPercent ${grandTotalValueDiffPercent}"
-  ) >> ${fileroot}"/logs/mailrate.log"
+  ) >> ${log_file}
 fi
 
-# Send email
-echo "Sending email..."
-$(/usr/sbin/ssmtp "${email_address}" < "${email_file}")
+# Send update email
+echo "Sending update email..."
 
-# Remove sent email render file
-if [[ -f "${email_file}" ]]; then
-  rm "${email_file}"
+/usr/sbin/ssmtp "${email_address}" < "${email_file}"
+
+# Send graphs email
+if [[ ${sendGraphs} == "y" ]]; then
+  echo "Creating graphs email..."
+
+  graphs_subject="Grafieken"
+
+  d=$(date +%Y.%m.%d)
+  startDate=$(cat "${log_file}" | grep date | head -1 | awk '{print $2}')
+  # startDate=$(date +%Y.%m.%d --date="$(date +%Y-%m-%d) -2 month")
+
+  plotGraph() {
+    gnuplotscript=$(cat "${fileroot}/gnuplot_scripts/$1.p")
+    parsedscript=$(eval "echo \"${gnuplotscript}\"")
+    echo "${parsedscript}" > "${parsed_script_file}"
+
+    cat "${log_file}" |  "${fileroot}/awk_scripts/$1.awk" > "${graph_data_file}"
+
+    /usr/bin/gnuplot "${parsed_script_file}"
+  }
+
+  plotGraph "rateDiffPercent"
+  plotGraph "globalDiffPercent"
+  plotGraph "totalValue"
+
+  echo "Sending graphs email..."
+
+  graphs=$(find "${fileroot}"/*.png)
+  echo -e "subject:${graphs_subject}\n"| (cat - && (for g in $graphs ; do uuencode "$g" $(basename "$g") ; done )  ) | /usr/sbin/ssmtp "${email_address}"
+fi
+# Clean up temporary files
+echo "Cleaning up..."
+
+rm "${email_file}"
+if [[ ${sendGraphs} == "y" ]]; then
+  rm "${graph_data_file}"
+  rm "${parsed_script_file}"
+  rm "${fileroot}"/*.png
 fi

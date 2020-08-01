@@ -21,25 +21,42 @@ hexFilter() {
 # All decimal points need to be converted to dot (.) for calculation purposes
 
 scrape=$(curl https://www.morningstar.nl/nl/funds/snapshot/snapshot.aspx?id=F00000YGLU | grep -E "Koers.*EUR")
+sleep 5
 if [[ ${scrape} =~ $regex ]]; then
   data=$(hexFilter ${BASH_REMATCH[3]} | tr "," "." )
 fi
+
+sleep 5
 echo "${d},${data}" >> ${fileroot}/data/rates/NL0012125736
+sleep 5
 
 scrape=$(curl https://www.morningstar.nl/nl/funds/snapshot/snapshot.aspx?id=F0GBR04B0Q | grep -E "Koers.*EUR")
+sleep 5
 if [[ ${scrape} =~ $regex ]]; then
   data=$(hexFilter ${BASH_REMATCH[3]} | tr "," "." )
 fi
+
+sleep 5
 echo "${d},${data}" >> ${fileroot}/data/rates/NL0006311839
+sleep 5
 
 scrape=$(curl https://www.morningstar.nl/nl/funds/snapshot/snapshot.aspx?id=F0GBR04B0M | grep -E "Koers.*EUR")
+sleep 5
 if [[ ${scrape} =~ $regex ]]; then
   data=$(hexFilter ${BASH_REMATCH[3]} | tr "," "." )
 fi
+
+sleep 5
 echo "${d},${data}" >> ${fileroot}/data/rates/NL0006311821
+sleep 5
 
 scrape=$(curl https://www.morningstar.nl/nl/funds/snapshot/snapshot.aspx?id=F0GBR04B1D | grep -E "Koers.*EUR")
+sleep 5
 if [[ ${scrape} =~ $regex ]]; then
   data=$(hexFilter ${BASH_REMATCH[3]} | tr "," "." )
 fi
+
+sleep 5
+
+
 echo "${d},${data}" >> ${fileroot}/data/rates/NL0006311771

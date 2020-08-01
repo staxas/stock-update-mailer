@@ -1,0 +1,368 @@
+---
+date 2020.07.10
+time 03H:00M:01S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 43.16 154.54 16.43 23.91
+rateDiffPercent 0 0 0 0
+totalPurchaseCurrValue 0.00 100.00 100.00 200.00
+totalPurchaseDiff 0.00 0.00 0.00 0.00
+grandTotalPurchase 400.00
+grandTotalCurrValue 400.00
+grandTotalValueDiff 0.00
+grandTotalValueDiffPercent 0
+---
+date 2020.07.11
+time 03H:00M:01S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 43.45 155.40 16.49 23.87
+rateDiffPercent 0 0.55649 0.365186 -0.167294
+totalPurchaseCurrValue 0.00 100.56 100.36 199.66
+totalPurchaseDiff 0.00 0.56 0.37 -0.34
+grandTotalPurchase 400.00
+grandTotalCurrValue 400.59
+grandTotalValueDiff 0.59
+grandTotalValueDiffPercent 0.14675
+---
+date 2020.07.12
+time 03H:00M:01S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 43.45 155.40 16.49 23.87
+rateDiffPercent 0.000 0.556 0.365 -0.167
+totalPurchaseCurrValue 0.00 100.56 100.36 199.66
+totalPurchaseDiff 0.00 0.56 0.37 -0.34
+grandTotalPurchase 400.00
+grandTotalCurrValue 400.59
+grandTotalValueDiff 0.59
+grandTotalValueDiffPercent 0.147
+---
+date 2020.07.13
+time 03H:00M:01S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 43.45 155.40 16.49 23.87
+rateDiffPercent 0.000 0.556 0.365 -0.167
+totalPurchaseCurrValue 0.00 100.56 100.36 199.66
+totalPurchaseDiff 0.00 0.56 0.37 -0.34
+grandTotalPurchase 400.00
+grandTotalCurrValue 400.59
+grandTotalValueDiff 0.59
+grandTotalValueDiffPercent 0.147
+---
+date 2020.07.14
+time 03H:00M:02S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 43.39 155.26 16.47 24.00
+rateDiffPercent 0.000 0.466 0.243 0.376
+totalPurchaseCurrValue 0.00 100.47 100.24 200.75
+totalPurchaseDiff 0.00 0.47 0.24 0.75
+grandTotalPurchase 400.00
+grandTotalCurrValue 401.46
+grandTotalValueDiff 1.46
+grandTotalValueDiffPercent 0.366
+---
+date 2020.07.15
+time 03H:00M:01S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 42.75 151.44 16.39 23.82
+rateDiffPercent 0.000 -2.006 -0.243 -0.376
+totalPurchaseCurrValue 0.00 97.99 99.76 199.25
+totalPurchaseDiff 0.00 -2.01 -0.24 -0.75
+grandTotalPurchase 400.00
+grandTotalCurrValue 397.00
+grandTotalValueDiff -3.00
+grandTotalValueDiffPercent -0.751
+---
+date 2020.07.16
+time 03H:00M:01S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 42.72 152.08 16.38 23.95
+rateDiffPercent 0.000 -1.592 -0.304 0.167
+totalPurchaseCurrValue 0.00 98.41 99.70 200.34
+totalPurchaseDiff 0.00 -1.59 -0.30 0.34
+grandTotalPurchase 400.00
+grandTotalCurrValue 398.44
+grandTotalValueDiff -1.56
+grandTotalValueDiffPercent -0.390
+---
+date 2020.07.17
+time 03H:00M:01S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 42.77 152.55 16.37 24.20
+rateDiffPercent 0.000 -1.288 -0.365 1.213
+totalPurchaseCurrValue 0.00 98.71 99.63 202.43
+totalPurchaseDiff 0.00 -1.29 -0.37 2.43
+grandTotalPurchase 400.00
+grandTotalCurrValue 400.77
+grandTotalValueDiff 0.77
+grandTotalValueDiffPercent 0.193
+---
+date 2020.07.18
+time 03H:00M:02S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 42.05 150.16 16.39 24.06
+rateDiffPercent 0.000 -2.834 -0.243 0.627
+totalPurchaseCurrValue 0.00 97.17 99.76 201.26
+totalPurchaseDiff 0.00 -2.83 -0.24 1.25
+grandTotalPurchase 400.00
+grandTotalCurrValue 398.18
+grandTotalValueDiff -1.82
+grandTotalValueDiffPercent -0.455
+---
+date 2020.07.19
+time 03H:00M:01S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 42.05 150.16 16.39 24.06
+rateDiffPercent 0.000 -2.834 -0.243 0.627
+totalPurchaseCurrValue 0.00 97.17 99.76 201.26
+totalPurchaseDiff 0.00 -2.83 -0.24 1.25
+grandTotalPurchase 400.00
+grandTotalCurrValue 398.18
+grandTotalValueDiff -1.82
+grandTotalValueDiffPercent -0.455
+---
+date 2020.07.20
+time 03H:00M:01S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 42.05 150.16 16.39 24.06
+rateDiffPercent 0.000 -2.834 -0.243 0.627
+totalPurchaseCurrValue 0.00 97.17 99.76 201.26
+totalPurchaseDiff 0.00 -2.83 -0.24 1.25
+grandTotalPurchase 400.00
+grandTotalCurrValue 398.18
+grandTotalValueDiff -1.82
+grandTotalValueDiffPercent -0.455
+---
+date 2020.07.21
+time 03H:00M:02S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 42.43 151.50 16.39 24.11
+rateDiffPercent 0.000 -1.967 -0.243 0.836
+totalPurchaseCurrValue 0.00 98.03 99.76 201.67
+totalPurchaseDiff 0.00 -1.97 -0.24 1.67
+grandTotalPurchase 400.00
+grandTotalCurrValue 399.46
+grandTotalValueDiff -0.54
+grandTotalValueDiffPercent -0.134
+---
+date 2020.07.22
+time 03H:00M:02S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 42.92 155.89 16.39 24.28
+rateDiffPercent 0.000 0.874 -0.243 1.547
+totalPurchaseCurrValue 0.00 100.87 99.76 203.10
+totalPurchaseDiff 0.00 0.87 -0.24 3.10
+grandTotalPurchase 400.00
+grandTotalCurrValue 403.73
+grandTotalValueDiff 3.73
+grandTotalValueDiffPercent 0.931
+---
+date 2020.07.23
+time 03H:00M:01S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 43.00 153.47 16.38 24.26
+rateDiffPercent 0.000 -0.692 -0.304 1.464
+totalPurchaseCurrValue 0.00 99.31 99.70 202.93
+totalPurchaseDiff 0.00 -0.69 -0.30 2.93
+grandTotalPurchase 400.00
+grandTotalCurrValue 401.93
+grandTotalValueDiff 1.93
+grandTotalValueDiffPercent 0.483
+---
+date 2020.07.24
+time 03H:00M:01S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 42.77 152.81 16.28 24.10
+rateDiffPercent 0.000 -1.119 -0.913 0.795
+totalPurchaseCurrValue 0.00 98.88 99.09 201.59
+totalPurchaseDiff 0.00 -1.12 -0.91 1.59
+grandTotalPurchase 400.00
+grandTotalCurrValue 399.56
+grandTotalValueDiff -0.44
+grandTotalValueDiffPercent -0.111
+---
+date 2020.07.25
+time 03H:00M:01S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 42.48 150.34 16.29 23.92
+rateDiffPercent 0.000 -2.718 -0.852 0.042
+totalPurchaseCurrValue 0.00 97.28 99.15 200.08
+totalPurchaseDiff 0.00 -2.72 -0.85 0.08
+grandTotalPurchase 400.00
+grandTotalCurrValue 396.51
+grandTotalValueDiff -3.49
+grandTotalValueDiffPercent -0.871
+---
+date 2020.07.26
+time 03H:00M:01S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 42.48 150.34 16.29 23.92
+rateDiffPercent 0.000 -2.718 -0.852 0.042
+totalPurchaseCurrValue 0.00 97.28 99.15 200.08
+totalPurchaseDiff 0.00 -2.72 -0.85 0.08
+grandTotalPurchase 400.00
+grandTotalCurrValue 396.51
+grandTotalValueDiff -3.49
+grandTotalValueDiffPercent -0.871
+---
+date 2020.07.27
+time 03H:00M:01S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 42.48 150.34 16.29 23.92
+rateDiffPercent 0.000 -2.718 -0.852 0.042
+totalPurchaseCurrValue 0.00 97.28 99.15 200.08
+totalPurchaseDiff 0.00 -2.72 -0.85 0.08
+grandTotalPurchase 400.00
+grandTotalCurrValue 396.51
+grandTotalValueDiff -3.49
+grandTotalValueDiffPercent -0.871
+---
+date 2020.07.28
+time 03H:00M:01S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0.00 100.00 100.00 200.00
+averageRate 0.00 154.54 16.43 23.91
+lastRate 41.84 147.84 16.28 23.70
+rateDiffPercent 0.000 -4.335 -0.913 -0.878
+totalPurchaseCurrValue 0.00 95.66 99.09 198.24
+totalPurchaseDiff 0.00 -4.34 -0.91 -1.76
+grandTotalPurchase 400.00
+grandTotalCurrValue 392.99
+grandTotalValueDiff -7.01
+grandTotalValueDiffPercent -1.751
+---
+date 2020.07.29
+time 08H:36M:08S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0 100 100 200
+averageRate 0 154.54 16.43 23.91
+lastRate 41.88 148.61 16.14 23.66
+rateDiffPercent 0 -3.83719 -1.76506 -1.04559
+totalPurchaseCurrValue 0 96.1629 98.235 197.909
+totalPurchaseDiff 0 -3.8371 -1.765 -2.091
+grandTotalPurchase 400
+grandTotalCurrValue 392.307
+grandTotalValueDiff -7.693
+grandTotalValueDiffPercent -1.92325
+---
+date 2020.07.30
+time 03H:00M:02S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0 100 100 200
+averageRate 0 154.54 16.43 23.91
+lastRate 42.03 147.71 16.20 23.60
+rateDiffPercent 0 -4.41957 -1.39988 -1.29653
+totalPurchaseCurrValue 0 95.5805 98.6002 197.407
+totalPurchaseDiff 0 -4.4195 -1.3998 -2.593
+grandTotalPurchase 400
+grandTotalCurrValue 391.588
+grandTotalValueDiff -8.412
+grandTotalValueDiffPercent -2.103
+---
+date 2020.07.31
+time 03H:00M:02S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0 100 100 200
+averageRate 0 154.54 16.43 23.91
+lastRate 42.63 148.94 16.16 23.73
+rateDiffPercent 0 -3.62366 -1.64334 -0.752823
+totalPurchaseCurrValue 0 96.3764 98.3567 198.494
+totalPurchaseDiff 0 -3.6236 -1.6433 -1.506
+grandTotalPurchase 400
+grandTotalCurrValue 393.227
+grandTotalValueDiff -6.773
+grandTotalValueDiffPercent -1.69325
+---
+date 2020.08.01
+time 03H:00M:01S
+stocks NL0006311771 NL0006311821 NL0006311839 NL0012125736
+nrOfEntries 0 1 1 1
+totalAmountTraded 0 0.647082 6.08643 8.3647
+totalPurchase 0 100 100 200
+averageRate 0 154.54 16.43 23.91
+lastRate 42.01 148.59 16.16 23.52
+rateDiffPercent 0 -3.85014 -1.64334 -1.63112
+totalPurchaseCurrValue 0 96.1499 98.3567 196.738
+totalPurchaseDiff 0 -3.8501 -1.6433 -3.262
+grandTotalPurchase 400
+grandTotalCurrValue 391.245
+grandTotalValueDiff -8.755
+grandTotalValueDiffPercent -2.18875

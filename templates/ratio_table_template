@@ -1,0 +1,25 @@
+<hr>
+<hr>
+<table>
+    <thead>
+        <tr>
+            <th colspan="5">Ratios</th>
+        </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td>Sust Eq (~88%)</td>
+      <td>Em Markets (~12%)</td>
+      <td>IT of total stock (~15-20%)</td>
+      <td>Total stock (~60%)</td>
+      <td>Bonds (~40%)</td>
+    </tr>
+    <tr>
+    <td>${sefPercentFormatted}</td>
+      <td>${emMrkPercentFormatted}</td>
+      <td>${itPercentFormatted}</td>
+      <td>${stockPercentFormatted}</td>
+      <td>${bondsPercentFormatted}</td>
+    </tr>
+    </tbody>
+</table>
