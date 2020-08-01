@@ -252,11 +252,13 @@ do
   fi
 done
 
+# Output if corresponding rate data for trades have not been found (and thus not used for calculations)
+echo "Checking if all trade data was found..."
 i=0
 for isTracked in ${tracked[@]}
 do
   if [[ ${isTracked} != "1" ]]; then
-    echo "No rates found for trade of ${amountTraded[i]} of ${stocksTraded[i]} on ${buyDates[i]}"
+    echo "No rates found for trade of ${amountTraded[i]} of ${stocksTraded[i]} on ${buyDates[i]}!"
   fi
   i=$((i+1))
 done
