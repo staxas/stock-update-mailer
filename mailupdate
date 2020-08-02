@@ -276,7 +276,6 @@ echo "Subject: ${email_subject}";
 echo "Content-Type: text/html";
 echo "MIME-Version: 1.0";
 echo "";
-echo "$(cat ${email_file})";
 ) >> "${email_file}"
 
 # Add email header
