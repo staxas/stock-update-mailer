@@ -21,7 +21,8 @@ You will need to create entries of the names and presentation order of your stoc
 When ordering stocks in 'data/naming/names', always use increments of 1 starting at 0 and never use the same number twice.
 
 Sending of graph emails (mailupdate -g y) requires a log file with data of previous runs. You will always want logging to be
-on (mailupdate -l y) if you wish to get graph emails.
+on (mailupdate -l y) if you wish to get graph emails. Only run 'mailupdate' once a day, or you will have duplicate dates in 
+your log file, which will distort your graph data (although minimally).
 
 See the 'gnuplot_scripts' and 'awk_scripts' directory for example graph rendering files. Remember to manually add the rendering
 of graphs in the 'mailupdates' script (see the 'plotGraph' function in 'mailupdate').
