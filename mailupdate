@@ -79,7 +79,7 @@ do
 done
 
 # Function to get first index of an item in an array
-getPos() {
+getIndex() {
   local toFind=${1}
   shift
   local i=0;
@@ -95,7 +95,7 @@ getPos() {
 }
 
 # Function to get all indexes of an item in an array as an array
-getPoss() {
+getIndexes() {
   local toFind="${1}"
   shift
   local i=0;
@@ -174,10 +174,10 @@ done
 if [[ -f ${stock_names_file} ]]; then
   while IFS="," read -r stk order name
   do
-    pos=$(getPos ${stk} ${stocks[@]})
-    if [[ $pos != "-1" ]]; then
-      stockNames[${pos}]=${name}
-      stockOrder[${order}]=${pos}
+    index=$(getIndex ${stk} ${stocks[@]})
+    if [[ $index != "-1" ]]; then
+      stockNames[${index}]=${name}
+      stockOrder[${order}]=${index}
     fi
   done < "${stock_names_file}"
 else
@@ -221,44 +221,44 @@ echo "Getting stock data..."
 for stock in ${stocks[@]}
 do
   # Try to get the position of the current stock being checked
-  indPos=$(getPos ${stock} ${stocks[@]})
-  if [[ ${indPos} != -1 ]]; then
+  stockIndex=$(getIndex ${stock} ${stocks[@]})
+  if [[ ${stockIndex} != -1 ]]; then
   # Start reading the historic data of that stock
-    if [[ -f "${filenames[indPos]}" ]]; then
+    if [[ -f "${filenames[stockIndex]}" ]]; then
       while IFS="," read -r d rate
       do
         # If the current stock being checked was traded and on the current date being cheked,
         # then try to get the positions of this/those date(s) in the ownership arrays
-        bdPoss=$(getPoss ${d} ${buyDates[@]})
+        tradeDateIndexes=$(getIndexes ${d} ${buyDates[@]})
         # Loop through the found dates (if any)
-        for bdPos in ${bdPoss[@]}
+        for tdIndex in ${tradeDateIndexes[@]}
         do
           # If the stock being checked was bought or sold on one of the days found matching this stock,
-          if [[ ${stock} == ${stocksTraded[bdPos]} ]] && [[ ${tracked[bdPos]} == "0" ]]; then
+          if [[ ${stock} == ${stocksTraded[tdIndex]} ]] && [[ ${tracked[tdIndex]} == "0" ]]; then
             # then get the data
-            purchase=$(awk '{print $1*$2}' <<< "${amountTraded[bdPos]} ${rate}")
-            if (( $(echo "${amountTraded[bdPos]} >= 0" | bc -l) )); then
+            purchase=$(awk '{print $1*$2}' <<< "${amountTraded[tdIndex]} ${rate}")
+            if (( $(echo "${amountTraded[tdIndex]} >= 0" | bc -l) )); then
               # On amount bought, do this
-              totalAmountTraded[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountTraded[indPos]} ${amountTraded[bdPos]}")
-              totalPurchase[indPos]=$(awk '{print $1+$2}' <<< "${totalPurchase[indPos]} ${purchase}")
+              totalAmountTraded[stockIndex]=$(awk '{print $1+$2}' <<< "${totalAmountTraded[stockIndex]} ${amountTraded[tdIndex]}")
+              totalPurchase[stockIndex]=$(awk '{print $1+$2}' <<< "${totalPurchase[stockIndex]} ${purchase}")
               grandTotalPurchase=$(awk '{print $1+$2}' <<< "${grandTotalPurchase} ${purchase}")
             else
               # If stocks have been sold (negative amount), calculate current average rate
               # and remove from total and grand total purchase at that rate
-              currAverageRate=$(awk '{print ($1/($2))}' <<< "${totalPurchase[indPos]} ${totalAmountTraded[indPos]}")
-              totalAmountTraded[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountTraded[indPos]} ${amountTraded[bdPos]}")
-              totalPurchase[indPos]=$(awk '{print $1+($2*$3)}' <<< "${totalPurchase[indPos]} ${amountTraded[bdPos]} ${currAverageRate}")
-              grandTotalPurchase=$(awk '{print $1+($2*$3)}' <<< "${grandTotalPurchase} ${amountTraded[bdPos]} ${currAverageRate}")
+              currAverageRate=$(awk '{print ($1/($2))}' <<< "${totalPurchase[stockIndex]} ${totalAmountTraded[stockIndex]}")
+              totalAmountTraded[stockIndex]=$(awk '{print $1+$2}' <<< "${totalAmountTraded[stockIndex]} ${amountTraded[tdIndex]}")
+              totalPurchase[stockIndex]=$(awk '{print $1+($2*$3)}' <<< "${totalPurchase[stockIndex]} ${amountTraded[tdIndex]} ${currAverageRate}")
+              grandTotalPurchase=$(awk '{print $1+($2*$3)}' <<< "${grandTotalPurchase} ${amountTraded[tdIndex]} ${currAverageRate}")
             fi
             # Set traded stock data as having being tracked so it is not counted twice if there are
             # more than one instances of historic stock rates on the same day. This means calculations
             # are done on the first instance of a historic rate on a given date. Subsequent data is ignored.
-            tracked[bdPos]="1"
+            tracked[tdIndex]="1"
             # Used for logging
-            nrOfEntries[indPos]=$((nrOfEntries[indPos] + 1))
+            nrOfEntries[stockIndex]=$((nrOfEntries[stockIndex] + 1))
           fi
         done
-      done < "${filenames[indPos]}"
+      done < "${filenames[stockIndex]}"
     fi
   fi
 done
@@ -388,14 +388,14 @@ fi
 
 # Calculation percentages of amount of stock owned and add ratio table to email
 if [[ ${renderRatios} == "y" ]]; then
-  sefPos=$(getPos "NL0012125736" ${stocks[@]})
-  emMrkPos=$(getPos "NL0006311771" ${stocks[@]})
-  itPos=$(getPos "NL0006311821" ${stocks[@]})
-  glObPos=$(getPos "NL0006311839" ${stocks[@]})
-  sefVal=${totalPurchaseCurrValue[${sefPos}]}
-  emMrkVal=${totalPurchaseCurrValue[${emMrkPos}]}
-  itVal=${totalPurchaseCurrValue[${itPos}]}
-  glObVal=${totalPurchaseCurrValue[${glObPos}]}
+  sefIndex=$(getIndex "NL0012125736" ${stocks[@]})
+  emMrkIndex=$(getIndex "NL0006311771" ${stocks[@]})
+  itIndex=$(getIndex "NL0006311821" ${stocks[@]})
+  globIndex=$(getIndex "NL0006311839" ${stocks[@]})
+  sefVal=${totalPurchaseCurrValue[${sefIndex}]}
+  emMrkVal=${totalPurchaseCurrValue[${emMrkIndex}]}
+  itVal=${totalPurchaseCurrValue[${itIndex}]}
+  glObVal=${totalPurchaseCurrValue[${globIndex}]}
 
   sefTotal=$(awk '{print ($1+$2)}' <<< "${sefVal} ${emMrkVal}")
 

@@ -5,7 +5,7 @@
 # By Edwin Rietmeijer, 2020
 
 # Function to get first index of an item in an array
-getPos() {
+getIndex() {
   local toFind=${1}
   shift
   local i=0;
@@ -48,10 +48,10 @@ i=0
 if [[ -f ${stock_names_file} ]]; then
   while IFS="," read -r stk order name
   do
-    pos=$(getPos ${stk} ${stocks[@]})
-    if [[ $pos != "-1" ]]; then
-      stockNames[${pos}]=${name}
-      stockOrder[${order}]=${pos}
+    index=$(getIndex ${stk} ${stocks[@]})
+    if [[ $index != "-1" ]]; then
+      stockNames[${index}]=${name}
+      stockOrder[${order}]=${index}
       i=$((i+1))
     fi
   done < "${stock_names_file}"
