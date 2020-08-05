@@ -4,7 +4,7 @@
 # MailUpdate v0.1
 # By Edwin Rietmeijer, 2020
 
-if [[ ${1} == "" ]]; then
+if [[ -z ${1} ]]; then
   echo "Usage: $(basename ${0}) <email-addr> [-c <symbol>] [-d <symbol>] [-e <email-addr>] [-s <subject>] [-g <y/n>] [-q <subject> ] [-l <y/n>] [-r <y/n>] [-w <y/n>]"
   echo ""
   echo "Currency symbol (-c) is blank by default"
@@ -33,7 +33,7 @@ do
      if [[ $OPTARG == "y" ]] || [[ $OPTARG == "n" ]]; then
        logging=$OPTARG
      else
-       echo "Invalid Option: -$OPTARG , logging setting can only be 'y' or 'n'" 1>&2
+       echo "Invalid Option: -l $OPTARG , logging setting can only be 'y' or 'n'" 1>&2
        exit 1
      fi
      ;;
@@ -41,7 +41,7 @@ do
      if [[ $OPTARG == "y" ]] || [[ $OPTARG == "n" ]]; then
        sendGraphs=$OPTARG
      else
-       echo "Invalid Option: -$OPTARG , graph email setting can only be 'y' or 'n'" 1>&2
+       echo "Invalid Option: -g $OPTARG , graph email setting can only be 'y' or 'n'" 1>&2
        exit 1
      fi
      ;;
@@ -49,7 +49,7 @@ do
      if [[ $OPTARG == "y" ]] || [[ $OPTARG == "n" ]]; then
        renderRatios=$OPTARG
      else
-       echo "Invalid Option: -$OPTARG , ratio table setting can only be 'y' or 'n'" 1>&2
+       echo "Invalid Option: -r $OPTARG , ratio table setting can only be 'y' or 'n'" 1>&2
        exit 1
      fi
      ;;
@@ -57,7 +57,7 @@ do
      if [[ $OPTARG == "y" ]] || [[ $OPTARG == "n" ]]; then
        forceOnWeekend=$OPTARG
      else
-       echo "Invalid Option: -$OPTARG , force on weekend setting can only be 'y' or 'n'" 1>&2
+       echo "Invalid Option: -w $OPTARG , force on weekend setting can only be 'y' or 'n'" 1>&2
        exit 1
      fi
      ;;
@@ -119,7 +119,7 @@ getIndexes() {
 fileroot="$( cd "$(dirname "$0")" || exit >/dev/null 2>&1 ; pwd -P )"
 log_file="${fileroot}/logs/mailupdate.log"
 stock_names_file="${fileroot}/data/naming/names"
-trades_stock_file="${fileroot}/data/user_data/trades"
+trades_file="${fileroot}/data/user_data/trades"
 email_file="${fileroot}/email.html"
 
 table_template_file="${fileroot}/templates/table_template"
@@ -195,14 +195,14 @@ tradeDates=()
 stocksTraded=()
 amountsTraded=()
 tracked=()
-if [[ -f "${trades_stock_file}" ]]; then
+if [[ -f "${trades_file}" ]]; then
   while IFS="," read -r d stock amount
   do
     tradeDates+=(${d})
     stocksTraded+=(${stock})
     amountsTraded+=(${amount})
     tracked+=("0")
-  done < "${trades_stock_file}"
+  done < "${trades_file}"
 fi
 if [[ ${#tradeDates[@]} == "0" ]]; then
   echo "No traded stock data found"
@@ -462,8 +462,8 @@ if [[ ${logging} == "y" ]]; then
   ) >> ${log_file}
 fi
 
-if [[ ${forceOnWeekend} != "y" && ( $(date +%a) == "Sun" || $(date +%a) == "Mon" ) ]]; then
- echo "Skipping sending of emails on weekends"
+if [[ ${forceOnWeekend} != "y" && ( $(date +%a) == "Sat" || $(date +%a) == "Sun" ) ]]; then
+ echo "Skipping sending of emails on weekends (see option -w)"
  if [[ -f "${email_file}" ]]; then
    rm "${email_file}"
  fi
