@@ -237,15 +237,16 @@ do
           if [[ ${stock} == ${stocksTraded[bdPos]} ]] && [[ ${tracked[bdPos]} == "0" ]]; then
             # then get the data
             purchase=$(awk '{print $1*$2}' <<< "${amountTraded[bdPos]} ${rate}")
-            totalAmountTraded[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountTraded[indPos]} ${amountTraded[bdPos]}")
             if (( $(echo "${amountTraded[bdPos]} >= 0" | bc -l) )); then
               # On amount bought, do this
+              totalAmountTraded[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountTraded[indPos]} ${amountTraded[bdPos]}")
               totalPurchase[indPos]=$(awk '{print $1+$2}' <<< "${totalPurchase[indPos]} ${purchase}")
               grandTotalPurchase=$(awk '{print $1+$2}' <<< "${grandTotalPurchase} ${purchase}")
             else
               # If stocks have been sold (negative amount), calculate current average rate
               # and remove from total and grand total purchase at that rate
-              currAverageRate=$(awk '{print ($1/($2-$3))*-1}' <<< "${totalPurchase[indPos]} ${amountTraded[bdPos]} ${totalAmountTraded[indPos]}")
+              currAverageRate=$(awk '{print ($1/($2))}' <<< "${totalPurchase[indPos]} ${totalAmountTraded[indPos]}")
+              totalAmountTraded[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountTraded[indPos]} ${amountTraded[bdPos]}")
               totalPurchase[indPos]=$(awk '{print $1+($2*$3)}' <<< "${totalPurchase[indPos]} ${amountTraded[bdPos]} ${currAverageRate}")
               grandTotalPurchase=$(awk '{print $1+($2*$3)}' <<< "${grandTotalPurchase} ${amountTraded[bdPos]} ${currAverageRate}")
             fi
