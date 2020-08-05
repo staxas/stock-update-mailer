@@ -5,7 +5,7 @@ Sends you html emails with totals of owned stock worth, average of buy rates of 
 comparisons with their current rate, and grand totals for all stocks being tracked. Can also
 send emails with images of graphs of stock movements.
 
-Note: the programs are aimed at calculating value of mailable stock information by collecting the buy rates
+Note: the scripts are aimed at calculating value of mailable stock information by collecting the buy rates
 only once per day (original goal of this project is to monitor long-term indice-based investments).
 When scraping stock data multiple times a day, only the first rate of that day will be used to calculate
 email data (with the exception of the 'last rates' numbers, which are always sourced from the rate last added
