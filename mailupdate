@@ -5,15 +5,16 @@
 # By Edwin Rietmeijer, 2020
 
 if [[ ${1} == "" ]]; then
-  echo "Usage: $(basename ${0}) <email-addr> [-c <symbol>] [-d <symbol>] [-e <email-addr>] [-s <subject>] [-r <y/n>] [-g <y/n>] [-l <y/n>]"
+  echo "Usage: $(basename ${0}) <email-addr> [-c <symbol>] [-d <symbol>] [-e <email-addr>] [-s <subject>] [-g <y/n>] [-l <y/n>] [-r <y/n>] [-w <y/n>]"
   echo ""
   echo "Currency symbol (-c) is blank by default"
   echo "Decimal separator symbol (-d) is locale decimal point by default"
   echo "Sender email address (-e) is <email-address> by default"
   echo "Email subject (-s) is 'Stock update' by default"
   echo "Logging (-l) is off by default"
-  echo "Graph email (-g) is off by default (needs log file)"
+  echo "Graph email (-g) is off by default (needs none-empty log file)"
   echo "Ratio table (-r) is off by default"
+  echo "Force on weekends (-w) is off by default"
   exit 0
 fi
 
@@ -23,50 +24,59 @@ shift
 sender_address=${email_address}
 email_subject="Stock update"
 
-while getopts ":l:c:d:e:s:g:r:" opt; do
-   case ${opt} in
-     l )
-       if [[ $OPTARG == "y" ]] || [[ $OPTARG == "n" ]]; then
-         logging=$OPTARG
-       else
-         echo "Invalid Option: -$OPTARG , logging setting can only be 'y' or 'n'" 1>&2
-         exit 1
-       fi
-       ;;
-     g )
-       if [[ $OPTARG == "y" ]] || [[ $OPTARG == "n" ]]; then
-         sendGraphs=$OPTARG
-       else
-         echo "Invalid Option: -$OPTARG , graph email setting can only be 'y' or 'n'" 1>&2
-         exit 1
-       fi
-       ;;
-     r )
-       if [[ $OPTARG == "y" ]] || [[ $OPTARG == "n" ]]; then
-         renderRatios=$OPTARG
-       else
-         echo "Invalid Option: -$OPTARG , ratio table setting can only be 'y' or 'n'" 1>&2
-         exit 1
-       fi
-       ;;
-     c )
-       currency=$OPTARG
-       ;;
-     d )
-       separator=$OPTARG
-       ;;
-     e )
-       sender_address=$OPTARG
-       ;;
-     s )
-       email_subject=$OPTARG
-       ;;
-    * )
-       echo "Invalid Option: -$OPTARG " 1>&2
+while getopts ":l:c:d:e:s:g:r:w:" opt;
+do
+  case ${opt} in
+   l )
+     if [[ $OPTARG == "y" ]] || [[ $OPTARG == "n" ]]; then
+       logging=$OPTARG
+     else
+       echo "Invalid Option: -$OPTARG , logging setting can only be 'y' or 'n'" 1>&2
        exit 1
-       ;;
-   esac
- done
+     fi
+     ;;
+   g )
+     if [[ $OPTARG == "y" ]] || [[ $OPTARG == "n" ]]; then
+       sendGraphs=$OPTARG
+     else
+       echo "Invalid Option: -$OPTARG , graph email setting can only be 'y' or 'n'" 1>&2
+       exit 1
+     fi
+     ;;
+   r )
+     if [[ $OPTARG == "y" ]] || [[ $OPTARG == "n" ]]; then
+       renderRatios=$OPTARG
+     else
+       echo "Invalid Option: -$OPTARG , ratio table setting can only be 'y' or 'n'" 1>&2
+       exit 1
+     fi
+     ;;
+   w )
+     if [[ $OPTARG == "y" ]] || [[ $OPTARG == "n" ]]; then
+       forceOnWeekend=$OPTARG
+     else
+       echo "Invalid Option: -$OPTARG , force on weekend setting can only be 'y' or 'n'" 1>&2
+       exit 1
+     fi
+     ;;
+   c )
+     currency=$OPTARG
+     ;;
+   d )
+     separator=$OPTARG
+     ;;
+   e )
+     sender_address=$OPTARG
+     ;;
+   s )
+     email_subject=$OPTARG
+     ;;
+  * )
+     echo "Invalid Option: -$OPTARG " 1>&2
+     exit 1
+     ;;
+  esac
+done
 
 # Function to get first index of an item in an array
 getPos() {
@@ -228,15 +238,15 @@ do
             # then get the data
             purchase=$(awk '{print $1*$2}' <<< "${amountTraded[bdPos]} ${rate}")
             totalAmountTraded[indPos]=$(awk '{print $1+$2}' <<< "${totalAmountTraded[indPos]} ${amountTraded[bdPos]}")
-            if (( $(echo "$amountTraded >= 0" | bc -l) )); then
+            if (( $(echo "${amountTraded[bdPos]} >= 0" | bc -l) )); then
               # On amount bought, do this
               totalPurchase[indPos]=$(awk '{print $1+$2}' <<< "${totalPurchase[indPos]} ${purchase}")
               grandTotalPurchase=$(awk '{print $1+$2}' <<< "${grandTotalPurchase} ${purchase}")
             else
               # If stocks have been sold (negative amount), calculate current average rate
               # and remove from total and grand total purchase at that rate
-              currAverageRate=$(awk '{print $1/$2}' <<< "${totalPurchase[indPos]} ${totalAmountTraded[indPos]}")
-              totalPurchase[indPos]=$(awk '{print $1+($2*$3}' <<< "${totalPurchase[indPos]} ${amountTraded[bdPos]} ${currAverageRate}")
+              currAverageRate=$(awk '{print ($1/($2-$3))*-1}' <<< "${totalPurchase[indPos]} ${amountTraded[bdPos]} ${totalAmountTraded[indPos]}")
+              totalPurchase[indPos]=$(awk '{print $1+($2*$3)}' <<< "${totalPurchase[indPos]} ${amountTraded[bdPos]} ${currAverageRate}")
               grandTotalPurchase=$(awk '{print $1+($2*$3)}' <<< "${grandTotalPurchase} ${amountTraded[bdPos]} ${currAverageRate}")
             fi
             # Set traded stock data as having being tracked so it is not counted twice if there are
@@ -444,6 +454,14 @@ if [[ ${logging} == "y" ]]; then
   echo "grandTotalValueDiff ${grandTotalValueDiff}"
   echo "grandTotalValueDiffPercent ${grandTotalValueDiffPercent}"
   ) >> ${log_file}
+fi
+
+if [[ ${forceOnWeekend} != "y" && ( $(date +%a) == "Sun" || $(date +%a) == "Mon" ) ]]; then
+ echo "Skipping sending of emails on weekends"
+ if [[ -f "${email_file}" ]]; then
+   rm "${email_file}"
+ fi
+ exit 0
 fi
 
 # Send update email

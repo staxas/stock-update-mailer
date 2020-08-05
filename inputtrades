@@ -222,7 +222,7 @@ do
   done
 
   lineToAdd="${dateToTrade},${stocks[${stockOrder[${stockToTrade}]}]},${unitsToTrade}"
-  #echo ${lineToAdd} >> "${traded_stock_file}"
+  echo ${lineToAdd} >> "${traded_stock_file}"
 
   echo
   echo "Transaction added"
