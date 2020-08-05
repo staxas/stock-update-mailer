@@ -12,7 +12,7 @@ if [[ ${1} == "" ]]; then
   echo "Sender email address (-e) is <email-address> by default"
   echo "Update email subject (-s) is 'Stock update' by default"
   echo "Logging (-l) is off by default"
-  echo "Graph email (-g) is off by default (needs none-empty log file)"
+  echo "Graph email (-g) is off by default (needs non-empty log file)"
   echo "Graph email subject (-q) is 'Graphs' by default"
   echo "Ratio table (-r) is off by default"
   echo "Force on weekends (-w) is off by default"
