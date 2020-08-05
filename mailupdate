@@ -5,14 +5,15 @@
 # By Edwin Rietmeijer, 2020
 
 if [[ ${1} == "" ]]; then
-  echo "Usage: $(basename ${0}) <email-addr> [-c <symbol>] [-d <symbol>] [-e <email-addr>] [-s <subject>] [-g <y/n>] [-l <y/n>] [-r <y/n>] [-w <y/n>]"
+  echo "Usage: $(basename ${0}) <email-addr> [-c <symbol>] [-d <symbol>] [-e <email-addr>] [-s <subject>] [-g <y/n>] [-q <subject> ] [-l <y/n>] [-r <y/n>] [-w <y/n>]"
   echo ""
   echo "Currency symbol (-c) is blank by default"
   echo "Decimal separator symbol (-d) is locale decimal point by default"
   echo "Sender email address (-e) is <email-address> by default"
-  echo "Email subject (-s) is 'Stock update' by default"
+  echo "Update email subject (-s) is 'Stock update' by default"
   echo "Logging (-l) is off by default"
   echo "Graph email (-g) is off by default (needs none-empty log file)"
+  echo "Graph email subject (-q) is 'Graphs' by default"
   echo "Ratio table (-r) is off by default"
   echo "Force on weekends (-w) is off by default"
   exit 0
@@ -23,8 +24,9 @@ email_address=${1}
 shift
 sender_address=${email_address}
 email_subject="Stock update"
+graph_email_subject="Graphs"
 
-while getopts ":l:c:d:e:s:g:r:w:" opt;
+while getopts ":l:c:d:e:s:g:r:w:q:" opt;
 do
   case ${opt} in
    l )
@@ -70,6 +72,9 @@ do
      ;;
    s )
      email_subject=$OPTARG
+     ;;
+   q )
+     graph_email_subject=$OPTARG
      ;;
   * )
      echo "Invalid Option: -$OPTARG " 1>&2
@@ -186,20 +191,20 @@ else
 fi
 
 # Get traded stocks, dates & amounts Traded
-buyDates=()
+tradeDates=()
 stocksTraded=()
-amountTraded=()
+amountsTraded=()
 tracked=()
 if [[ -f "${trades_stock_file}" ]]; then
-  while IFS="," read -r d stock amt
+  while IFS="," read -r d stock amount
   do
-    buyDates+=(${d})
+    tradeDates+=(${d})
     stocksTraded+=(${stock})
-    amountTraded+=(${amt})
+    amountsTraded+=(${amount})
     tracked+=("0")
   done < "${trades_stock_file}"
 fi
-if [[ ${#buyDates[@]} == "0" ]]; then
+if [[ ${#tradeDates[@]} == "0" ]]; then
   echo "No traded stock data found"
 fi
 
@@ -229,26 +234,26 @@ do
       do
         # If the current stock being checked was traded and on the current date being cheked,
         # then try to get the positions of this/those date(s) in the ownership arrays
-        tradeDateIndexes=$(getIndexes ${d} ${buyDates[@]})
+        tradeDateIndexes=$(getIndexes ${d} ${tradeDates[@]})
         # Loop through the found dates (if any)
         for tdIndex in ${tradeDateIndexes[@]}
         do
           # If the stock being checked was bought or sold on one of the days found matching this stock,
           if [[ ${stock} == ${stocksTraded[tdIndex]} ]] && [[ ${tracked[tdIndex]} == "0" ]]; then
             # then get the data
-            purchase=$(awk '{print $1*$2}' <<< "${amountTraded[tdIndex]} ${rate}")
-            if (( $(echo "${amountTraded[tdIndex]} >= 0" | bc -l) )); then
+            purchase=$(awk '{print $1*$2}' <<< "${amountsTraded[tdIndex]} ${rate}")
+            if (( $(echo "${amountsTraded[tdIndex]} >= 0" | bc -l) )); then
               # On amount bought, do this
-              totalAmountTraded[stockIndex]=$(awk '{print $1+$2}' <<< "${totalAmountTraded[stockIndex]} ${amountTraded[tdIndex]}")
+              totalAmountTraded[stockIndex]=$(awk '{print $1+$2}' <<< "${totalAmountTraded[stockIndex]} ${amountsTraded[tdIndex]}")
               totalPurchase[stockIndex]=$(awk '{print $1+$2}' <<< "${totalPurchase[stockIndex]} ${purchase}")
               grandTotalPurchase=$(awk '{print $1+$2}' <<< "${grandTotalPurchase} ${purchase}")
             else
               # If stocks have been sold (negative amount), calculate current average rate
               # and remove from total and grand total purchase at that rate
               currAverageRate=$(awk '{print ($1/($2))}' <<< "${totalPurchase[stockIndex]} ${totalAmountTraded[stockIndex]}")
-              totalAmountTraded[stockIndex]=$(awk '{print $1+$2}' <<< "${totalAmountTraded[stockIndex]} ${amountTraded[tdIndex]}")
-              totalPurchase[stockIndex]=$(awk '{print $1+($2*$3)}' <<< "${totalPurchase[stockIndex]} ${amountTraded[tdIndex]} ${currAverageRate}")
-              grandTotalPurchase=$(awk '{print $1+($2*$3)}' <<< "${grandTotalPurchase} ${amountTraded[tdIndex]} ${currAverageRate}")
+              totalAmountTraded[stockIndex]=$(awk '{print $1+$2}' <<< "${totalAmountTraded[stockIndex]} ${amountsTraded[tdIndex]}")
+              totalPurchase[stockIndex]=$(awk '{print $1+($2*$3)}' <<< "${totalPurchase[stockIndex]} ${amountsTraded[tdIndex]} ${currAverageRate}")
+              grandTotalPurchase=$(awk '{print $1+($2*$3)}' <<< "${grandTotalPurchase} ${amountsTraded[tdIndex]} ${currAverageRate}")
             fi
             # Set traded stock data as having being tracked so it is not counted twice if there are
             # more than one instances of historic stock rates on the same day. This means calculations
@@ -269,7 +274,7 @@ i=0
 for isTracked in ${tracked[@]}
 do
   if [[ ${isTracked} != "1" ]]; then
-    echo "No rates found for trade of ${amountTraded[i]} of ${stocksTraded[i]} on ${buyDates[i]}!"
+    echo "No rates found for trade of ${amountsTraded[i]} of ${stocksTraded[i]} on ${tradeDates[i]}!"
   fi
   i=$((i+1))
 done
@@ -482,8 +487,6 @@ fi
 if [[ ${sendGraphs} == "y" ]] && [[ -s "${log_file}" ]]; then
   echo "Creating graphs email..."
 
-  graphs_subject="Grafieken"
-
   d=$(date +%Y.%m.%d)
   startDate=$(cat "${log_file}" | grep date | head -1 | awk '{print $2}')
   # startDate=$(date +%Y.%m.%d --date="$(date +%Y-%m-%d) -2 month")
@@ -505,7 +508,7 @@ if [[ ${sendGraphs} == "y" ]] && [[ -s "${log_file}" ]]; then
   echo "Sending graphs email..."
 
   graphs=$(find "${fileroot}"/*.png)
-  echo -e "subject:${graphs_subject}\n"| (cat - && (for g in $graphs ; do uuencode "$g" $(basename "$g") ; done )  ) | /usr/sbin/ssmtp "${email_address}"
+  echo -e "subject:${graph_email_subject}\n"| (cat - && (for g in $graphs ; do uuencode "$g" $(basename "$g") ; done )  ) | /usr/sbin/ssmtp "${email_address}"
 fi
 
 # Clean up temporary files
