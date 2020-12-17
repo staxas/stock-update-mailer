@@ -21,7 +21,7 @@ You will need to create entries of the names and presentation order of your stoc
 When ordering stocks in 'data/naming/names', always use increments of 1 starting at 0 and never use the same number twice.
 
 Sending of graph emails (mailupdate -g y) requires a log file with data of previous runs. You will always want logging to be
-on (mailupdate -l y) if you wish to get graph emails. Only run 'mailupdate' once a day, or you will have duplicate dates in 
+on (mailupdate -l y) if you wish to get graph emails. Only run 'mailupdate' once a day, or you will have duplicate dates in
 your log file, which will distort your graph data (although minimally).
 
 See the 'gnuplot_scripts' and 'awk_scripts' directory for example graph rendering files. Remember to manually add the rendering
@@ -35,3 +35,8 @@ well-known strategy for long-term retirement investing).
 Requires ssmtp to be installed and configured correctly
 
 Requires gnuplot for rendering of graph images
+
+NEW: add stock automatically with 'autotrade' script. See example 'autotrading' data file under data/user_data. Add stocks with historic rates
+by adding a number as an optional parameter indicating how many days in the past rates will be looked up ('look-back'). Only the
+last rate of that day will be used. The 'p' and 'u' flag indicate the final number in the row is either a price or a unit amount.
+Units will be added directly, prices will be calculated from the rate of the day 'autotrade' is being run, minus the 'look-back' amount.
