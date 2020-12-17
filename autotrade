@@ -1,0 +1,99 @@
+#!/bin/bash
+
+d=$(date +%Y.%m.%d)
+if [ ${1} != "" ] && [ ${1} -lt 0 ] ; then
+  d=$(date -d "${currDate} -${1} day" +%Y.%m.%d);
+fi
+
+# Function to get first index of an item in an array
+getIndex() {
+  local toFind=${1}
+  shift
+  local i=0;
+  for v in ${@}
+  do
+    if [[ $v == $toFind ]]; then
+      echo ${i};
+      return;
+    fi;
+  i=$((i + 1));
+  done;
+  echo -1;
+}
+
+# Project working directory and files
+fileroot="$( cd "$(dirname "$0")" || exit >/dev/null 2>&1 ; pwd -P )"
+autotrading_file="${fileroot}/data/user_data/autotrading"
+traded_stock_file="${fileroot}/data/user_data/trades"
+
+# Prepare arrays
+rateFiles=$(find "${fileroot}"/data/rates/*)
+stocksToTrade=()
+tradeTypesToTrade=()
+amountsToTrade=()
+
+# Get autotrades
+if [[ -f ${autotrading_file} ]]; then
+  while IFS="," read -r stk trdtp amt
+  do
+    stocksToTrade+=(${stk})
+    tradeTypesToTrade+=(${trdtp})
+    amountsToTrade+=(${amt})
+  done < "${autotrading_file}"
+else
+  echo "${autotrading_file} does not exist"
+  exit 1
+fi
+
+# Get rates for date being traded
+stockNames=()
+stockRates=()
+for rateFile in ${rateFiles[@]}
+do
+  tmpRate=0
+  baseNameRateFile=$(basename ${rateFile})
+  stockNames+=(${baseNameRateFile})
+  if [[ -f ${rateFile} ]]; then
+    while IFS="," read -r dte rte
+    do
+      if [[ ${dte} == ${d} ]] ; then
+        tmpRate=${rte}
+      fi
+    done < "${rateFile}"
+    if [[ ${tmpRate} = 0 ]] ; then
+      echo "No rate found for stock ${stockNames[-1]} for date ${d}"
+      exit 1
+    else
+      stockRates+=(${tmpRate})
+    fi
+  else
+    echo "${rateFile} does not exist"
+  fi
+done
+
+# Check if all stocks attempted to be bought or sold are being tracked
+i=0
+for stockToTrade in ${stocksToTrade[@]}
+do
+  index=$(getIndex ${stockToTrade} ${stockNames[@]})
+  if [ ${index} -eq "-1" ] ; then
+    echo "Rate data for stock ${stockToTrade} not found"
+    exit 1
+  else
+    if [ ${tradeTypesToTrade[${i}]} = "u" ]; then
+      # Unit trade
+      lineToAdd="${d},${stockToTrade},${amountsToTrade[${i}]}"
+    fi
+    if [ ${tradeTypesToTrade[${i}]} = "p" ]; then
+      # Price trade
+      indexOfStockPrice=$(getIndex ${stockToTrade} ${stockNames})
+      stockPriceOnDate=${stockRates[${indexOfStockPrice}]}
+      unitsToTrade=$(awk '{print $1/$2}' <<< "${amountsToTrade[${i}]} ${stockPriceOnDate}" )
+      echo "${amountsToTrade[${i}]} / ${stockPriceOnDate} = ${unitsToTrade}" 
+      lineToAdd="${d},${stockToTrade},${unitsToTrade}"
+    fi
+  fi
+  echo ${lineToAdd}
+  echo ${lineToAdd} >> "${traded_stock_file}"
+  i=$((i+1))
+done
