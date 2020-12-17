@@ -186,7 +186,7 @@ if [[ -f ${stock_names_file} ]]; then
     fi
   done < "${stock_names_file}"
 else
-  echo "${stock_names_file} does not exist"
+  echo "${stock_names_file} does not exist" 1>&2
   exit 1
 fi
 
@@ -395,32 +395,40 @@ fi
 if [[ ${renderRatios} == "y" ]]; then
   sefIndex=$(getIndex "NL0012125736" ${stocks[@]})
   emMrkIndex=$(getIndex "NL0006311771" ${stocks[@]})
-  itIndex=$(getIndex "NL0006311821" ${stocks[@]})
-  globIndex=$(getIndex "NL0006311839" ${stocks[@]})
+  smrtConnIndex=$(getIndex "NL0006311821" ${stocks[@]})
+  globSusOppIndex=$(getIndex "NL0009265404" ${stocks[@]})
+  climateEnvIndex=$(getIndex "LU2142125447" ${stocks[@]})
+  globOblIndex=$(getIndex "NL0006311839" ${stocks[@]})
+  hiDivOblIndex=$(getIndex "NL0006311813" ${stocks[@]})
   sefVal=${totalPurchaseCurrValue[${sefIndex}]}
   emMrkVal=${totalPurchaseCurrValue[${emMrkIndex}]}
-  itVal=${totalPurchaseCurrValue[${itIndex}]}
-  glObVal=${totalPurchaseCurrValue[${globIndex}]}
+  smartConnVal=${totalPurchaseCurrValue[${smrtConnIndex}]}
+  globSusOppVal=${totalPurchaseCurrValue[${globSusOppIndex}]}
+  climateEnvVal=${totalPurchaseCurrValue[${climateEnvIndex}]}
+  glObOblVal=${totalPurchaseCurrValue[${globOblIndex}]}
+  hiDivOblIndexVal=${totalPurchaseCurrValue[${hiDivOblIndex}]}
 
   sefTotal=$(awk '{print ($1+$2)}' <<< "${sefVal} ${emMrkVal}")
 
-  stockTotal=$(awk '{print ($1+$2+$3)}' <<< "${sefVal} ${emMrkVal} ${itVal}")
+  stockTotal=$(awk '{print ($1+$2+$3+$4+$5)}' <<< "${sefVal} ${emMrkVal} ${smartConnVal} ${globSusOppVal} ${climateEnvVal}")
+  bondsTotal=$(awk '{print ($1+$2)}' << "${glObOblVal} ${hiDivOblIndexVal}")
 
   sefPercent=$(awk '{print (($1/$2)*100)}' <<< "${sefVal} ${sefTotal}")
   emMrkPercent=$(awk '{print (($1/$2)*100)}' <<< "${emMrkVal} ${sefTotal}")
-  itPercent=$(awk '{print (($1/$2)*100)}' <<< "${itVal} ${stockTotal}")
+  smartConnPercent=$(awk '{print (($1/$2)*100)}' <<< "${smartConnVal} ${stockTotal}")
+
   stockPercent=$(awk '{print (($1/$2)*100)}' <<< "${stockTotal} ${grandTotalCurrValue}")
-  bondsPercent=$(awk '{print (($1/$2)*100)}' <<< "${glObVal} ${grandTotalCurrValue}")
+  bondsPercent=$(awk '{print (($1/$2)*100)}' <<< "${bondsTotal} ${grandTotalCurrValue}")
 
   sefPercentFormatted=$(printf "%0.1f\n" ${sefPercent/./${locDec}})
   emMrkPercentFormatted=$(printf "%0.1f\n" ${emMrkPercent/./${locDec}})
-  itPercentFormatted=$(printf "%0.1f\n" ${itPercent/./${locDec}})
+  smartConnPercentFormatted=$(printf "%0.1f\n" ${smartConnPercent/./${locDec}})
   stockPercentFormatted=$(printf "%0.1f\n" ${stockPercent/./${locDec}})
   bondsPercentFormatted=$(printf "%0.1f\n" ${bondsPercent/./${locDec}})
 
   sefPercentFormatted=${sefPercentFormatted/${locDec}/.}" %"
   emMrkPercentFormatted=${emMrkPercentFormatted/${locDec}/.}" %"
-  itPercentFormatted=${itPercentFormatted/${locDec}/.}" %"
+  smartConnPercentFormatted=${smartConnPercentFormatted/${locDec}/.}" %"
   stockPercentFormatted=${stockPercentFormatted/${locDec}/.}" %"
   bondsPercentFormatted=${bondsPercentFormatted/${locDec}/.}" %"
 
@@ -462,7 +470,7 @@ if [[ ${logging} == "y" ]]; then
   ) >> ${log_file}
 fi
 
-if [[ ${forceOnWeekend} != "y" && ( $(date +%a) == "Sat" || $(date +%a) == "Sun" ) ]]; then
+if [[ ${forceOnWeekend} != "y" && ( $(date +%a) == "Sun" || $(date +%a) == "Mon" ) ]]; then
  echo "Skipping sending of emails on weekends (see option -w)"
  if [[ -f "${email_file}" ]]; then
    rm "${email_file}"
