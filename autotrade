@@ -1,8 +1,11 @@
 #!/bin/bash
 
-d=$(date +%Y.%m.%d)
-if [ ${1} != "" ] && [ ${1} -lt 0 ] ; then
-  d=$(date -d "${currDate} -${1} day" +%Y.%m.%d);
+if [[ ${1} = "-h" ]] || [[ ${1} = "-?" ]] || [[ ${1} = "?" ]] ; then
+  echo "Usage: $(basename ${0}) [<look-back>]"
+  echo ""
+  echo "Look-back is a number that indictaes how many days in the past"
+  echo "the trades took place"
+  exit 0
 fi
 
 # Function to get first index of an item in an array
@@ -20,6 +23,26 @@ getIndex() {
   done;
   echo -1;
 }
+
+# Calculate date for stock trade
+currDate=$(date +%Y%m%d)
+regexCheckIfNumber='^[0-9]+$'
+if [[ ${1} != "" ]] ; then
+  if ! [[ ${1} =~ ${regexCheckIfNumber} ]]  ; then
+     echo "Look-back input is not a number" >&2;
+     exit 1
+  fi
+fi
+
+if [[ ${1} = "" ]]; then
+  lookBack=0
+else
+  lookBack=${1}
+fi
+
+d=$(date -d "${currDate} -${lookBack} day" +%Y.%m.%d);
+
+echo $d
 
 # Project working directory and files
 fileroot="$( cd "$(dirname "$0")" || exit >/dev/null 2>&1 ; pwd -P )"
@@ -41,7 +64,7 @@ if [[ -f ${autotrading_file} ]]; then
     amountsToTrade+=(${amt})
   done < "${autotrading_file}"
 else
-  echo "${autotrading_file} does not exist"
+  echo "${autotrading_file} does not exist" >&2
   exit 1
 fi
 
@@ -61,13 +84,13 @@ do
       fi
     done < "${rateFile}"
     if [[ ${tmpRate} = 0 ]] ; then
-      echo "No rate found for stock ${stockNames[-1]} for date ${d}"
+      echo "No rate found for stock ${stockNames[-1]} for date ${d}" >&2
       exit 1
     else
       stockRates+=(${tmpRate})
     fi
   else
-    echo "${rateFile} does not exist"
+    echo "${rateFile} does not exist" >&2
   fi
 done
 
@@ -77,7 +100,7 @@ for stockToTrade in ${stocksToTrade[@]}
 do
   index=$(getIndex ${stockToTrade} ${stockNames[@]})
   if [ ${index} -eq "-1" ] ; then
-    echo "Rate data for stock ${stockToTrade} not found"
+    echo "Rate data for stock ${stockToTrade} not found" >&2
     exit 1
   else
     if [ ${tradeTypesToTrade[${i}]} = "u" ]; then
@@ -89,10 +112,10 @@ do
       indexOfStockPrice=$(getIndex ${stockToTrade} ${stockNames})
       stockPriceOnDate=${stockRates[${indexOfStockPrice}]}
       unitsToTrade=$(awk '{print $1/$2}' <<< "${amountsToTrade[${i}]} ${stockPriceOnDate}" )
-      echo "${amountsToTrade[${i}]} / ${stockPriceOnDate} = ${unitsToTrade}" 
       lineToAdd="${d},${stockToTrade},${unitsToTrade}"
     fi
   fi
+  # Write trade to console and file
   echo ${lineToAdd}
   echo ${lineToAdd} >> "${traded_stock_file}"
   i=$((i+1))
