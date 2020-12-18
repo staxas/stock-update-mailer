@@ -3,7 +3,7 @@
 if [[ ${1} = "-h" ]] || [[ ${1} = "-?" ]] || [[ ${1} = "?" ]] ; then
   echo "Usage: $(basename ${0}) [<look-back>]"
   echo ""
-  echo "Look-back is a number that indictaes how many days in the past"
+  echo "Look-back is a number that indicates how many days in the past"
   echo "the trades took place"
   exit 0
 fi
@@ -105,14 +105,14 @@ do
   else
     if [ ${tradeTypesToTrade[${i}]} = "u" ]; then
       # Unit trade
-      lineToAdd="${d},${stockToTrade},${amountsToTrade[${i}]}"
+      lineToAdd="${currDate},${stockToTrade},${amountsToTrade[${i}]}"
     fi
     if [ ${tradeTypesToTrade[${i}]} = "p" ]; then
       # Price trade
       indexOfStockPrice=$(getIndex ${stockToTrade} ${stockNames})
       stockPriceOnDate=${stockRates[${indexOfStockPrice}]}
       unitsToTrade=$(awk '{print $1/$2}' <<< "${amountsToTrade[${i}]} ${stockPriceOnDate}" )
-      lineToAdd="${d},${stockToTrade},${unitsToTrade}"
+      lineToAdd="${currDate},${stockToTrade},${unitsToTrade}"
     fi
   fi
   # Write trade to console and file
