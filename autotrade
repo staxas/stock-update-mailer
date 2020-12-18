@@ -40,9 +40,9 @@ else
   lookBack=${1}
 fi
 
-d=$(date -d "${currDate} -${lookBack} day" +%Y.%m.%d);
+calcDate=$(date -d "${currDate} -${lookBack} day" +%Y.%m.%d);
 
-echo $d
+echo ${calcDate}
 
 # Project working directory and files
 fileroot="$( cd "$(dirname "$0")" || exit >/dev/null 2>&1 ; pwd -P )"
@@ -79,12 +79,12 @@ do
   if [[ -f ${rateFile} ]]; then
     while IFS="," read -r dte rte
     do
-      if [[ ${dte} == ${d} ]] ; then
+      if [[ ${dte} == ${calcDate} ]] ; then
         tmpRate=${rte}
       fi
     done < "${rateFile}"
     if [[ ${tmpRate} = 0 ]] ; then
-      echo "No rate found for stock ${stockNames[-1]} for date ${d}" >&2
+      echo "No rate found for stock ${stockNames[-1]} for date ${calcDate}" >&2
       exit 1
     else
       stockRates+=(${tmpRate})
@@ -105,14 +105,14 @@ do
   else
     if [ ${tradeTypesToTrade[${i}]} = "u" ]; then
       # Unit trade
-      lineToAdd="${currDate},${stockToTrade},${amountsToTrade[${i}]}"
+      lineToAdd="${calcDate},${stockToTrade},${amountsToTrade[${i}]}"
     fi
     if [ ${tradeTypesToTrade[${i}]} = "p" ]; then
       # Price trade
       indexOfStockPrice=$(getIndex ${stockToTrade} ${stockNames})
       stockPriceOnDate=${stockRates[${indexOfStockPrice}]}
       unitsToTrade=$(awk '{print $1/$2}' <<< "${amountsToTrade[${i}]} ${stockPriceOnDate}" )
-      lineToAdd="${currDate},${stockToTrade},${unitsToTrade}"
+      lineToAdd="${calcDate},${stockToTrade},${unitsToTrade}"
     fi
   fi
   # Write trade to console and file
