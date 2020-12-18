@@ -94,10 +94,11 @@ do
   fi
 done
 
-# Check if all stocks attempted to be bought or sold are being tracked
+# Add trades to trade file
 i=0
 for stockToTrade in ${stocksToTrade[@]}
 do
+  # Check if all stocks attempted to be bought or sold are being tracked
   index=$(getIndex ${stockToTrade} ${stockNames[@]})
   if [ ${index} -eq "-1" ] ; then
     echo "Rate data for stock ${stockToTrade} not found" >&2
