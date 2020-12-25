@@ -411,7 +411,7 @@ if [[ ${renderRatios} == "y" ]]; then
   sefTotal=$(awk '{print ($1+$2)}' <<< "${sefVal} ${emMrkVal}")
 
   stockTotal=$(awk '{print ($1+$2+$3+$4+$5)}' <<< "${sefVal} ${emMrkVal} ${smartConnVal} ${globSusOppVal} ${climateEnvVal}")
-  bondsTotal=$(awk '{print ($1+$2)}' << "${glObOblVal} ${hiDivOblIndexVal}")
+  bondsTotal=$(awk '{print ($1+$2)}' <<< "${glObOblVal} ${hiDivOblIndexVal}")
 
   sefPercent=$(awk '{print (($1/$2)*100)}' <<< "${sefVal} ${sefTotal}")
   emMrkPercent=$(awk '{print (($1/$2)*100)}' <<< "${emMrkVal} ${sefTotal}")
